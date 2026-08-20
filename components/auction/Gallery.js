@@ -3,8 +3,8 @@
  * labelled thumbnails beneath it.
  */
 
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import PlayButton from '../PlayButton';
 import { SectionHeading } from '../ui';
 import { color, font, layout, radius, spacing } from '../../theme/tokens';
 
@@ -29,13 +29,7 @@ export default function Gallery({ gallery, onPlay, onSelectThumbnail }) {
           onPress={onPlay}
           style={({ pressed }) => [styles.play, pressed && styles.pressed]}
         >
-          <FontAwesome6
-            name="play"
-            size={18}
-            color={color.icon.inverseBold}
-            iconStyle="solid"
-            style={styles.playGlyph}
-          />
+          <PlayButton size={50} />
         </Pressable>
       </View>
 
@@ -45,11 +39,12 @@ export default function Gallery({ gallery, onPlay, onSelectThumbnail }) {
         style={styles.strip}
         contentContainerStyle={styles.stripContent}
       >
-        {gallery.thumbnails.map((label, i) => (
+        {gallery.thumbnails.map((thumb, i) => (
           <Pressable
-            key={`${label}-${i}`}
+            key={`${thumb.category}-${i}`}
             accessibilityRole="button"
-            onPress={() => onSelectThumbnail?.(i)}
+            accessibilityLabel={`View ${thumb.label} photos`}
+            onPress={() => onSelectThumbnail?.(thumb.category)}
             style={({ pressed }) => [styles.thumb, pressed && styles.pressed]}
           >
             <Image
@@ -58,7 +53,7 @@ export default function Gallery({ gallery, onPlay, onSelectThumbnail }) {
               resizeMode="cover"
               accessibilityIgnoresInvertColors
             />
-            <Text style={styles.thumbLabel}>{label}</Text>
+            <Text style={styles.thumbLabel}>{thumb.label}</Text>
           </Pressable>
         ))}
       </ScrollView>
@@ -83,13 +78,6 @@ const styles = StyleSheet.create({
   play: {
     width: 50,
     height: 50,
-    borderRadius: radius.full,
-    backgroundColor: 'rgba(255, 255, 255, 0.35)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  playGlyph: {
-    marginLeft: 3,
   },
   strip: {
     marginTop: spacing[4],
@@ -111,7 +99,7 @@ const styles = StyleSheet.create({
     backgroundColor: color.background.neutralRegular,
   },
   thumbLabel: {
-    ...font.bodyXsRegular,
+    ...font.subheadlineEmphasized,
     color: color.text.labelPrimary,
     marginTop: spacing[2],
   },

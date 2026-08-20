@@ -55,6 +55,30 @@ export const auction = {
       '140bhp fuel injected car with desirable five-speed transmission',
     ],
     readMore: 'Read more',
+    readLess: 'Read less',
+    /**
+     * Revealed by "Read more" (Figma 235:2187). The comp leaves the history
+     * body hidden even when expanded, which would strand its heading with
+     * nothing under it — so the paragraphs from the file are shown here.
+     */
+    expanded: {
+      description: [
+        'Here is a real find. It is a one keeper, early 911 that has never been restored and oozes originality. That it is a 911E with the fuel injected, 140bhp Type 901 2litre engine adds to the appeal. Just 858 911E Targas like this one were ever built.',
+        'Recently arrived in Czechia, it presents beautifully in Burgundrot red metallic, 14in Fuchs and a highly preserved black interior. There is even an optional 5spd gearbox and exceptionally rare Coolair air conditioning.',
+        'It is unlikely you\u2019ll easily find another 911E quite like this one. From specification to provenance, this is one not to miss.',
+      ],
+      historyHeading: 'History and paperwork',
+      history: [
+        'Sold new in California, USA',
+        'Only one owner in the USA before export to the Czech Republic',
+        'Not registered in the Czech Republic yet',
+        'Complete documentation including the original service book',
+        'Factory handbooks in good condition',
+        'VIN confirms this is a factory 911E built in 1969 as a Targa',
+        'Only 2,826 Type 901 2litre 911Es were built during its single production year of 1969',
+        'Just 858 were Targas of which this car is number 524',
+      ],
+    },
   },
   interest: {
     heading: 'Interest in this vehicle?',
@@ -79,7 +103,13 @@ export const auction = {
   },
   gallery: {
     heading: 'Gallery',
-    thumbnails: ['Exterior', 'Interior', 'Engine', 'Interior'],
+    // Each thumbnail names the sheet category it opens on.
+    thumbnails: [
+      { label: 'Exterior', category: 'exterior' },
+      { label: 'Interior', category: 'interior' },
+      { label: 'Engine', category: 'engine' },
+      { label: 'Interior', category: 'interior' },
+    ],
   },
   /**
    * The gallery sheet (Figma 2:7881 video / 2:8090 photos). Both badges on the

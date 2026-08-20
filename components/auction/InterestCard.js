@@ -76,18 +76,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
+    // Keeps the rule hugging the label instead of filling the row.
+    alignSelf: 'flex-start',
   },
   flag: {
     width: size[6],
     height: size[6],
   },
-  // The location reads as a link in the comp: hairline rule under the whole
-  // label, pin included, rather than a text underline.
+  // The location reads as a link in the comp: a hairline under the label and
+  // its pin, sized to that content rather than run across the whole card.
   locationLabel: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: spacing[2],
     paddingBottom: spacing[1],
     borderBottomWidth: 1,
     borderBottomColor: color.border.neutralRegular,

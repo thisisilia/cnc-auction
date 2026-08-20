@@ -7,61 +7,84 @@
  * as the CNC vehicle page's Sell bar, so the two feel like one product.
  *
  * The dot pulses rather than sitting static, which is what marks the countdown
- * as live. The animation is opacity + scale only, so it can run on the native
- * driver and never blocks the scroll thread.
+ * as live. The animation is opacity + scale only, so on device it runs on the
+ * native driver and never blocks the scroll thread.
  */
 
 import { useEffect, useRef } from 'react';
-import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Platform, StyleSheet, Text, View } from 'react-native';
 import { Button } from '../ui';
 import { color, font, radius, spacing } from '../../theme/tokens';
 
 /**
- * A live dot with a halo pulsing out of it, on a 1.6s loop. `reduceMotion`
- * leaves the plain dot in place for anyone who has asked the OS for less
- * animation.
+ * A live dot with rings pulsing out of it, ported from the GSAP tween:
+ *
+ *   gsap.to(".ring", { scale: 1.75, opacity: 0, duration: 2,
+ *                      stagger: { each: 0.5, repeat: -1 } }).time(2)
+ *
+ * Each ring runs the same 2s scale-and-fade; `each: 0.5` offsets successive
+ * rings by half a second, and `repeat: -1` on the stagger loops each ring
+ * independently — so with a 2s duration and 0.5s spacing, four rings keep the
+ * sequence continuous. `.time(2)` seeks the timeline two seconds in so the
+ * pattern is already running on first paint rather than starting empty; the
+ * `delay` below is that same seek, expressed as a per-ring offset.
  */
-export function PulsingDot({ size = 12, dotColor = color.systemRed, reduceMotion = false }) {
-  const pulse = useRef(new Animated.Value(0)).current;
+const RING_COUNT = 4;
+const RING_DURATION = 2000;
+const RING_STAGGER = 500;
+
+function Ring({ size, dotColor, index }) {
+  const t = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (reduceMotion) return undefined;
     const loop = Animated.loop(
-      Animated.timing(pulse, {
+      Animated.timing(t, {
         toValue: 1,
-        duration: 1600,
-        easing: Easing.out(Easing.ease),
-        useNativeDriver: true,
-      })
+        duration: RING_DURATION,
+        easing: Easing.linear,
+        // react-native-web has no native driver; asking for one here leaves the
+        // loop parked on its end frame instead of restarting, so the rings
+        // freeze fully expanded. Drive it in JS on web, natively on device.
+        useNativeDriver: Platform.OS !== 'web',
+      }),
+      { resetBeforeIteration: true }
     );
-    loop.start();
+    // Stand in for .time(2): each ring enters already offset into the cycle,
+    // so the group is mid-sequence on the first frame.
+    const id = setTimeout(() => loop.start(), index * RING_STAGGER);
     return () => {
+      clearTimeout(id);
       loop.stop();
-      pulse.setValue(0);
     };
-  }, [pulse, reduceMotion]);
-
-  const haloScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 2.6] });
-  const haloOpacity = pulse.interpolate({
-    inputRange: [0, 0.15, 1],
-    outputRange: [0, 0.45, 0],
-  });
+  }, [t, index]);
 
   return (
+    <Animated.View
+      style={{
+        position: 'absolute',
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: dotColor,
+        opacity: t.interpolate({ inputRange: [0, 1], outputRange: [0.5, 0] }),
+        transform: [{ scale: t.interpolate({ inputRange: [0, 1], outputRange: [1, 1.75] }) }],
+      }}
+    />
+  );
+}
+
+/**
+ * `reduceMotion` leaves the plain dot in place for anyone who has asked the OS
+ * for less animation.
+ */
+export function PulsingDot({ size = 12, dotColor = color.systemRed, reduceMotion = false }) {
+  return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-      {reduceMotion ? null : (
-        <Animated.View
-          style={{
-            position: 'absolute',
-            width: size,
-            height: size,
-            borderRadius: size / 2,
-            backgroundColor: dotColor,
-            opacity: haloOpacity,
-            transform: [{ scale: haloScale }],
-          }}
-        />
-      )}
+      {reduceMotion
+        ? null
+        : Array.from({ length: RING_COUNT }).map((_, index) => (
+            <Ring key={index} size={size} dotColor={dotColor} index={index} />
+          ))}
       <View
         style={{
           width: size,

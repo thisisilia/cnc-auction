@@ -65,6 +65,7 @@ const styles = StyleSheet.create({
   },
   buttonPrimary: {
     backgroundColor: color.background.brandPrimaryRegular,
+    borderRadius: radius.xl,
   },
   buttonTonal: {
     backgroundColor: color.background.neutralRegular,

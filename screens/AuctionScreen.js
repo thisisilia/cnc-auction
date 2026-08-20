@@ -50,6 +50,18 @@ const HERO_HEIGHT = 295;
  * FAQ points at "Buying with Car & Classic" — the comp has no separate FAQ
  * block, and that card stack is the page's question-and-answer content.
  */
+/**
+ * Hero carousel: the walkaround video first, then the listing photos, so
+ * swiping on past the video walks the gallery. One committed image stands in
+ * for every frame until a real listing supplies its own URLs.
+ */
+const HERO_MEDIA = [
+  { key: 'video', type: 'video', source: require('../assets/figma/hero.jpg') },
+  { key: 'photo-1', type: 'photo', source: require('../assets/figma/hero.jpg') },
+  { key: 'photo-2', type: 'photo', source: require('../assets/figma/thumb.jpg') },
+  { key: 'photo-3', type: 'photo', source: require('../assets/figma/hero.jpg') },
+];
+
 const TABS = [
   { key: 'overview', label: 'Overview' },
   { key: 'highlights', label: 'Highlights' },
@@ -65,6 +77,8 @@ export default function AuctionScreen() {
 
   const [saved, setSaved] = useState(false);
   const [sheet, setSheet] = useState(null);
+  const [sheetCategory, setSheetCategory] = useState(null);
+  const [highlightsOpen, setHighlightsOpen] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -187,6 +201,11 @@ export default function AuctionScreen() {
 
   const toggleSave = () => setSaved((prev) => !prev);
 
+  const openSheet = (tab, category = null) => {
+    setSheetCategory(category);
+    setSheet(tab);
+  };
+
   return (
     <View style={styles.root}>
       <StatusBar barStyle={headerShown ? 'dark-content' : 'light-content'} translucent backgroundColor="transparent" />
@@ -201,12 +220,13 @@ export default function AuctionScreen() {
       >
         <Hero
           auction={auction}
+          media={HERO_MEDIA}
           topInset={insets.top}
           saved={saved}
           onSave={toggleSave}
-          onOpenPhotos={() => setSheet('photos')}
-          onOpenVideos={() => setSheet('video')}
-          onPlay={() => setSheet('video')}
+          onOpenPhotos={() => openSheet('photos')}
+          onOpenVideos={() => openSheet('video')}
+          onPlay={() => openSheet('video')}
         />
         <TimeBar countdown={auction.countdown} reserveStatus={auction.reserveStatus} />
 
@@ -236,7 +256,11 @@ export default function AuctionScreen() {
           </View>
 
           <View style={styles.block} onLayout={anchor('highlights')}>
-            <Highlights highlights={auction.highlights} />
+            <Highlights
+              highlights={auction.highlights}
+              expanded={highlightsOpen}
+              onToggle={() => setHighlightsOpen((prev) => !prev)}
+            />
           </View>
 
           <View style={styles.block}>
@@ -252,7 +276,11 @@ export default function AuctionScreen() {
           </View>
 
           <View style={styles.section} onLayout={anchor('gallery')}>
-            <Gallery gallery={auction.gallery} />
+            <Gallery
+              gallery={auction.gallery}
+              onPlay={() => openSheet('video')}
+              onSelectThumbnail={(category) => openSheet('photos', category)}
+            />
           </View>
 
           <View style={styles.section} onLayout={anchor('faq')}>
@@ -288,6 +316,7 @@ export default function AuctionScreen() {
         onClose={() => setSheet(null)}
         gallery={auction.gallerySheet}
         initialTab={sheet ?? 'photos'}
+        focusCategory={sheetCategory}
         saved={saved}
         onSave={toggleSave}
       />

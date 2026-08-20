@@ -13,7 +13,7 @@
  * horizontal scroll, so only the leading gutter needs setting.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../BottomSheet';
 import { Icon } from '../Icon';
@@ -69,12 +69,68 @@ function VideoBody() {
   );
 }
 
-function PhotosBody({ categories }) {
+/**
+ * `focusCategory` is the category a gallery thumbnail was tapped on. Its offset
+ * is captured by onLayout, so the jump waits for the row to exist rather than
+ * assuming a fixed height.
+ */
+function PhotosBody({ categories, focusCategory }) {
+  const scrollRef = useRef(null);
+  const rowRefs = useRef({});
+  const scrollY = useRef(0);
+  const cancelled = useRef(false);
+  // The last category has nothing beneath it, so without a tail it can never
+  // scroll to the top and its anchor lands short. The pad is exactly the gap
+  // between the viewport and that row's own height — no more, so scrolling to
+  // the end normally doesn't drop into dead space.
+  const [viewport, setViewport] = useState(0);
+  const [lastHeight, setLastHeight] = useState(0);
+  const lastKey = categories[categories.length - 1]?.key;
+  const tailPad = viewport && lastHeight ? Math.max(viewport - lastHeight - spacing[8], 0) : 0;
+
+  /**
+   * Measures the row against the scroller *now* rather than trusting a cached
+   * onLayout offset: on web onLayout is driven by a size observer, so a row
+   * pushed down by images decoding above it never reports its new position.
+   */
+  const jump = (key) => {
+    const row = rowRefs.current[key];
+    const scroller = scrollRef.current;
+    if (!row || !scroller || cancelled.current) return;
+    row.measureInWindow((_x, rowWindowY) => {
+      scroller.measureInWindow((_sx, scrollWindowY) => {
+        if (cancelled.current) return;
+        const y = scrollY.current + (rowWindowY - scrollWindowY);
+        scroller.scrollTo({ y: Math.max(y, 0), animated: false });
+      });
+    });
+  };
+
+  useEffect(() => {
+    cancelled.current = false;
+    if (!focusCategory) return undefined;
+    // Re-applied a few times as the photos decode and push the rows down. A
+    // drag cancels it, so it never fights someone already scrolling.
+    const timers = [0, 120, 350, 700, 1200].map((delay) =>
+      setTimeout(() => jump(focusCategory), delay)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [focusCategory]);
+
   return (
     <ScrollView
+      ref={scrollRef}
       style={styles.scroll}
-      contentContainerStyle={styles.photosContent}
+      contentContainerStyle={[styles.photosContent, { paddingBottom: spacing[8] + tailPad }]}
       showsVerticalScrollIndicator={false}
+      scrollEventThrottle={16}
+      onScroll={(e) => {
+        scrollY.current = e.nativeEvent.contentOffset.y;
+      }}
+      onLayout={(e) => setViewport(e.nativeEvent.layout.height)}
+      onScrollBeginDrag={() => {
+        cancelled.current = true;
+      }}
     >
       <ScrollView
         horizontal
@@ -82,15 +138,33 @@ function PhotosBody({ categories }) {
         contentContainerStyle={styles.strip}
       >
         {categories.map((category) => (
-          <View key={category.key} style={styles.stripItem}>
+          <Pressable
+            key={category.key}
+            accessibilityRole="button"
+            accessibilityLabel={`Jump to ${category.label}`}
+            onPress={() => {
+              cancelled.current = false;
+              jump(category.key);
+            }}
+            style={({ pressed }) => [styles.stripItem, pressed && styles.pressed]}
+          >
             <Image source={THUMB} style={styles.stripImage} resizeMode="cover" />
             <Text style={styles.stripLabel}>{category.label}</Text>
-          </View>
+          </Pressable>
         ))}
       </ScrollView>
 
       {categories.map((category) => (
-        <View key={category.key} style={styles.category}>
+        <View
+          key={category.key}
+          style={styles.category}
+          ref={(node) => {
+            rowRefs.current[category.key] = node;
+          }}
+          onLayout={(e) => {
+            if (category.key === lastKey) setLastHeight(e.nativeEvent.layout.height);
+          }}
+        >
           <Text style={styles.categoryHeading}>{category.label}</Text>
           <ScrollView
             horizontal
@@ -118,6 +192,7 @@ export default function GallerySheet({
   onClose,
   gallery,
   initialTab = 'photos',
+  focusCategory,
   saved = false,
   onSave,
   onShare,
@@ -164,7 +239,11 @@ export default function GallerySheet({
         />
       </View>
 
-      {tab === 'video' ? <VideoBody /> : <PhotosBody categories={gallery.categories} />}
+      {tab === 'video' ? (
+        <VideoBody />
+      ) : (
+        <PhotosBody categories={gallery.categories} focusCategory={visible ? focusCategory : null} />
+      )}
     </BottomSheet>
   );
 }
