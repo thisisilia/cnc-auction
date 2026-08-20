@@ -17,6 +17,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../BottomSheet';
 import { Icon } from '../Icon';
+import PlayButton from '../PlayButton';
 import { color, font, radius, spacing } from '../../theme/tokens';
 
 const PHOTO = require('../../assets/figma/hero.jpg');
@@ -62,7 +63,7 @@ function VideoBody() {
       <View style={styles.videoFrame}>
         <Image source={PHOTO} style={styles.videoImage} resizeMode="cover" />
         <View style={styles.playButton}>
-          <View style={styles.playGlyph} />
+          <PlayButton size={64} />
         </View>
       </View>
     </View>
@@ -121,7 +122,7 @@ function PhotosBody({ categories, focusCategory }) {
     <ScrollView
       ref={scrollRef}
       style={styles.scroll}
-      contentContainerStyle={[styles.photosContent, { paddingBottom: spacing[8] + tailPad }]}
+      contentContainerStyle={styles.photosContent}
       showsVerticalScrollIndicator={false}
       scrollEventThrottle={16}
       onScroll={(e) => {
@@ -328,29 +329,16 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  // Shared PlayButton (its own disc + triangle), centred over the video frame —
+  // the same control the hero and gallery use, so every play affordance matches.
   playButton: {
     position: 'absolute',
     alignSelf: 'center',
     top: (260 - 64) / 2,
     width: 64,
     height: 64,
-    borderRadius: radius.full,
-    backgroundColor: 'rgba(51, 51, 51, 0.55)',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  // A CSS triangle: the play glyph is drawn from borders so the sheet needs no
-  // extra icon font.
-  playGlyph: {
-    marginLeft: 5,
-    width: 0,
-    height: 0,
-    borderTopWidth: 11,
-    borderBottomWidth: 11,
-    borderLeftWidth: 18,
-    borderTopColor: 'transparent',
-    borderBottomColor: 'transparent',
-    borderLeftColor: color.icon.inverseBold,
   },
   scroll: {
     alignSelf: 'stretch',

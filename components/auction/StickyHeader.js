@@ -10,9 +10,13 @@
  */
 
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Icon } from '../Icon';
 import { color, font, radius, spacing } from '../../theme/tokens';
+
+// Inactive tab colour — Figma "highlight" grey.
+const TAB_INACTIVE = '#A4A9A4';
 
 export const HEADER_BAR = 34;
 export const TAB_ROW = 29;
@@ -48,6 +52,28 @@ export default function StickyHeader({
   topInset = 0,
   pointerEvents = 'auto',
 }) {
+  // Smoothly slide a single underline to the active tab (timing, no spring — so
+  // it eases in and never overshoots/bounces).
+  const [tabLayouts, setTabLayouts] = useState({});
+  const underlineX = useRef(new Animated.Value(0)).current;
+  const underlineW = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const l = tabLayouts[activeTab];
+    if (!l) return;
+    Animated.parallel([
+      Animated.timing(underlineX, { toValue: l.x, duration: 240, easing: Easing.out(Easing.cubic), useNativeDriver: false }),
+      Animated.timing(underlineW, { toValue: l.width, duration: 240, easing: Easing.out(Easing.cubic), useNativeDriver: false }),
+    ]).start();
+  }, [activeTab, tabLayouts, underlineX, underlineW]);
+
+  const measureTab = (key) => (e) => {
+    const { x, width } = e.nativeEvent.layout;
+    setTabLayouts((prev) =>
+      prev[key]?.x === x && prev[key]?.width === width ? prev : { ...prev, [key]: { x, width } }
+    );
+  };
+
   return (
     <Animated.View
       pointerEvents={pointerEvents}
@@ -89,13 +115,14 @@ export default function StickyHeader({
               accessibilityRole="tab"
               accessibilityState={{ selected: active }}
               onPress={() => onSelectTab(tab.key)}
+              onLayout={measureTab(tab.key)}
               style={({ pressed }) => [styles.tab, pressed && styles.pressed]}
             >
               <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>{tab.label}</Text>
-              <View style={[styles.underline, active && styles.underlineActive]} />
             </Pressable>
           );
         })}
+        <Animated.View style={[styles.underline, { left: underlineX, width: underlineW }]} />
       </View>
     </Animated.View>
   );
@@ -157,21 +184,20 @@ const styles = StyleSheet.create({
   tab: {
     alignItems: 'center',
   },
+  // Every tab is Callout/Emphasized; only the colour changes between states, so
+  // switching active never reflows the row (no weight jump).
   tabLabel: {
-    ...font.calloutRegular,
-    color: color.text.neutralRegular,
+    ...font.calloutEmphasized,
+    color: TAB_INACTIVE,
   },
   tabLabelActive: {
-    ...font.calloutEmphasized,
     color: color.text.neutralBold,
   },
   underline: {
-    marginTop: spacing[2],
+    position: 'absolute',
+    bottom: 0,
     height: 2,
-    alignSelf: 'stretch',
-    backgroundColor: 'transparent',
-  },
-  underlineActive: {
+    borderRadius: 1,
     backgroundColor: color.background.inverseBold,
   },
   pressed: {

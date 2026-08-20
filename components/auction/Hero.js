@@ -85,19 +85,11 @@ export default function Hero({
   const { width: windowWidth } = useWindowDimensions();
   const [measured, setMeasured] = useState(0);
   const width = measured || Math.min(windowWidth, layout.frameWidth);
-  const [page, setPage] = useState(0);
 
   return (
     <View style={styles.root} onLayout={(e) => setMeasured(e.nativeEvent.layout.width)}>
-      <ScrollView
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={(e) => {
-          setPage(Math.round(e.nativeEvent.contentOffset.x / width));
-        }}
-      >
-        {media.map((item, index) => (
+      <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false}>
+        {media.map((item) => (
           <View key={item.key} style={[styles.page, { width }]}>
             <Image
               source={item.source}
@@ -152,11 +144,6 @@ export default function Hero({
         />
       </View>
 
-      <View style={styles.dots} pointerEvents="none">
-        {media.map((item, index) => (
-          <View key={item.key} style={[styles.dot, index === page && styles.dotActive]} />
-        ))}
-      </View>
     </View>
   );
 }

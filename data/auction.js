@@ -25,6 +25,28 @@ export const auction = {
     tag: 'Bid',
     amount: '£32,000',
   },
+  /**
+   * The "Live auction activities" widget swipes across three compact pages —
+   * Recent, Bid history and Comments — and opens the full activity sheet on tap.
+   */
+  activity: {
+    pages: [
+      { key: 'recent', heading: 'Live auction activities', type: 'bid', initials: 'UN', name: 'RickyBobby', tag: 'Bid', amount: '£32,000' },
+      { key: 'bids', heading: 'Bid history', subheading: '4 Bids from 3 bidders', type: 'bid', initials: 'UN', name: 'User_Na••••', tag: 'Pre bid', amount: '£32,000' },
+      { key: 'comments', heading: 'Comments', subheading: '22', type: 'comment', initials: 'RB', text: 'I pity the fool who outbids me. I’m going to buy...' },
+    ],
+    counts: { recent: 8, bids: 4, comments: 4 },
+    // Interleaved feed for the sheet's Recent tab; split by type for the others.
+    feed: [
+      { id: 'b1', type: 'bid', initials: 'RB', name: 'Rick••••', time: 'Just now', amount: '£40,000', tag: 'Bid' },
+      { id: 'c1', type: 'comment', initials: 'BA', name: 'BA_Baracus', time: '2 mins', verified: true, text: "I pity the fool who outbids me. I'm going to buy this sucker, paint it black with a red stripe, then add some guns and maybe a rocket launcher." },
+      { id: 'b2', type: 'bid', initials: 'TW', name: 'Tom••••', time: '5 mins', amount: '£34,250', tag: 'Bid' },
+      { id: 'c2', type: 'comment', initials: 'BA', name: 'BA_Baracus', time: '2 mins', verified: true, text: "Don't you put that evil on me, Ricky Bobby!", replies: [{ id: 'c2r1', initials: 'RB', name: 'RickyBobby', time: '10 mins', verified: true, text: 'Let’s see what you got!' }] },
+      { id: 'c3', type: 'comment', initials: 'RB', name: 'RickyBobby', time: '10 mins', verified: true, text: 'This is a siccck whip, yo.' },
+      { id: 'b3', type: 'bid', initials: 'UN', name: 'User_Na••••', time: '12 mins', amount: '£31,000', tag: 'Pre bid' },
+      { id: 'b4', type: 'bid', initials: 'RB', name: 'RickyBobby', time: '15 mins', amount: '£30,000', tag: 'Bid' },
+    ],
+  },
   primaryAction: 'Place a bid',
   /**
    * Two columns of five, exactly as the comp splits them. `badge` rows render
@@ -108,7 +130,7 @@ export const auction = {
       { label: 'Exterior', category: 'exterior' },
       { label: 'Interior', category: 'interior' },
       { label: 'Engine', category: 'engine' },
-      { label: 'Interior', category: 'interior' },
+      { label: 'Machine', category: 'machine' },
     ],
   },
   /**
@@ -127,6 +149,7 @@ export const auction = {
       { key: 'exterior', label: 'Exterior', count: 14 },
       { key: 'interior', label: 'Interior', count: 12 },
       { key: 'engine', label: 'Engine', count: 8 },
+      { key: 'machine', label: 'Machine', count: 8 },
     ],
   },
   buyerGuide: {

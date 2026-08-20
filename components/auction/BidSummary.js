@@ -19,9 +19,7 @@ export default function BidSummary({ auction }) {
       <View style={styles.stats}>
         {auction.stats.map((stat) => (
           <View key={stat.label} style={styles.stat}>
-            <View style={styles.statIcon}>
-              <Icon name={stat.icon} size={13.5} color={color.icon.neutralRegular} />
-            </View>
+            <Icon name={stat.icon} size={13.5} color={color.icon.neutralRegular} />
             <Text style={styles.statLabel}>{stat.label}</Text>
           </View>
         ))}
@@ -55,17 +53,11 @@ const styles = StyleSheet.create({
   stat: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing[2],
-  },
-  // Figma seats each 13.5px glyph in an 18px box so the labels align.
-  statIcon: {
-    width: 18,
-    height: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
+    // Icon-to-text spacing is 2px.
+    gap: 2,
   },
   statLabel: {
     ...font.footnoteRegular,
-    color: color.text.neutralRegular,
+    color: '#5D605D',
   },
 });

@@ -94,8 +94,8 @@ const styles = StyleSheet.create({
     borderBottomColor: color.border.neutralRegular,
   },
   locationText: {
-    ...font.bodySmRegular,
-    color: color.text.labelPrimary,
+    ...font.subheadlineRegular,
+    color: '#333',
   },
   specialistRow: {
     marginTop: spacing[6],

@@ -61,7 +61,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing[2],
-    borderRadius: radius.md,
+    // Large buttons (Read more, Request viewing, Read full report, Get a quote,
+    // Place a bid) use a 16px corner. Sticky-bar CTAs override this to 12px.
+    borderRadius: radius.xl,
   },
   buttonPrimary: {
     backgroundColor: color.background.brandPrimaryRegular,

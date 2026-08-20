@@ -4,14 +4,18 @@
  */
 
 import { StyleSheet, Text, View } from 'react-native';
+import { PulsingDot } from './StickyBar';
+import { useCountdown } from './useCountdown';
 import { color, font, radius, spacing } from '../../theme/tokens';
 
-export default function TimeBar({ countdown, reserveStatus }) {
+export default function TimeBar({ countdown, reserveStatus, reduceMotion = false }) {
+  // Same live, pulsing countdown as the sticky bar (seeded from the same value).
+  const live = useCountdown(countdown);
   return (
     <View style={styles.root}>
       <View style={styles.countdown}>
-        <View style={styles.dot} />
-        <Text style={styles.countdownLabel}>{countdown}</Text>
+        <PulsingDot dotColor={color.systemBlue} reduceMotion={reduceMotion} />
+        <Text style={styles.countdownLabel}>{live}</Text>
       </View>
       <View style={styles.reservePill}>
         <Text style={styles.reserveLabel}>{reserveStatus}</Text>

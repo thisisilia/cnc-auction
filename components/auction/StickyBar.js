@@ -14,6 +14,7 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Platform, StyleSheet, Text, View } from 'react-native';
 import { Button } from '../ui';
+import { useCountdown } from './useCountdown';
 import { color, font, radius, spacing } from '../../theme/tokens';
 
 /**
@@ -106,15 +107,16 @@ export default function StickyBar({
   onPlaceBid,
   reduceMotion = false,
 }) {
+  const countdown = useCountdown(auction.countdown);
   return (
     <Animated.View
       onLayout={onLayout}
-      style={[styles.root, { transform: [{ translateY }], paddingBottom: bottomInset }]}
+      style={[styles.root, { transform: [{ translateY }], paddingBottom: Math.max(bottomInset, spacing[8]) }]}
     >
       <View style={styles.countdownRow}>
         <View style={styles.countdown}>
-          <PulsingDot reduceMotion={reduceMotion} />
-          <Text style={styles.countdownLabel}>{auction.countdown}</Text>
+          <PulsingDot dotColor={color.systemBlue} reduceMotion={reduceMotion} />
+          <Text style={styles.countdownLabel}>{countdown}</Text>
         </View>
         <View style={styles.reserveChip}>
           <Text style={styles.reserveLabel}>{auction.reserveStatus}</Text>
@@ -180,9 +182,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing[3],
     paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
+    paddingTop: spacing[2],
   },
   action: {
     flex: 1,
+    // Sticky bottom CTAs use a 12px corner (large in-page buttons stay 16px).
+    borderRadius: radius.lg,
   },
 });

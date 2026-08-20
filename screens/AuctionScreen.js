@@ -26,6 +26,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ActivityCard from '../components/auction/ActivityCard';
+import AuctionActivitySheet from '../components/auction/AuctionActivitySheet';
 import BidSummary from '../components/auction/BidSummary';
 import BuyerGuide from '../components/auction/BuyerGuide';
 import Gallery from '../components/auction/Gallery';
@@ -81,6 +82,12 @@ export default function AuctionScreen() {
   const [highlightsOpen, setHighlightsOpen] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [activityOpen, setActivityOpen] = useState(false);
+  const [activityTab, setActivityTab] = useState(0);
+  const openActivity = (tab) => {
+    setActivityTab(tab);
+    setActivityOpen(true);
+  };
 
   // Section offsets, measured against `body` rather than the page. `bodyY` is
   // what converts them to page scroll, and both re-fire as images finish
@@ -228,7 +235,7 @@ export default function AuctionScreen() {
           onOpenVideos={() => openSheet('video')}
           onPlay={() => openSheet('video')}
         />
-        <TimeBar countdown={auction.countdown} reserveStatus={auction.reserveStatus} />
+        <TimeBar countdown={auction.countdown} reserveStatus={auction.reserveStatus} reduceMotion={reduceMotion} />
 
         <View
           style={styles.body}
@@ -239,7 +246,7 @@ export default function AuctionScreen() {
           <BidSummary auction={auction} />
 
           <View style={styles.block}>
-            <ActivityCard activity={auction.latestActivity} />
+            <ActivityCard activity={auction.activity} onOpen={openActivity} />
           </View>
 
           <View
@@ -319,6 +326,14 @@ export default function AuctionScreen() {
         focusCategory={sheetCategory}
         saved={saved}
         onSave={toggleSave}
+      />
+
+      <AuctionActivitySheet
+        visible={activityOpen}
+        onClose={() => setActivityOpen(false)}
+        activity={auction.activity}
+        primaryAction={auction.primaryAction}
+        initialTab={activityTab}
       />
     </View>
   );
