@@ -1,0 +1,109 @@
+/**
+ * Copy and figures for the auction page, transcribed from the Figma comp
+ * (F8MOAGWXseU0ZudUHndgdR, node 2:5207). Kept apart from the views so the
+ * screen can be pointed at a real listings API without touching layout.
+ */
+
+export const auction = {
+  title: '1985 Porsche 911 Carrera 930 3.2',
+  currentBid: '£35,250',
+  currentBidLabel: 'Current Bid',
+  photoCount: 34,
+  videoCount: 1,
+  saveCount: 42,
+  countdown: '2d : 2h : 34m',
+  reserveStatus: 'Reserve nearly met',
+  stats: [
+    { icon: 'Gavel', label: '13 Bids' },
+    { icon: 'Comments', label: '6 Comments' },
+    { icon: 'Eye', label: '320 watching' },
+  ],
+  latestActivity: {
+    heading: 'Live auction activities',
+    bidderInitials: 'UN',
+    bidder: 'RickyBobby',
+    tag: 'Bid',
+    amount: '£32,000',
+  },
+  primaryAction: 'Place a bid',
+  /**
+   * Two columns of five, exactly as the comp splits them. `badge` rows render
+   * an image asset instead of a vector glyph.
+   */
+  specs: [
+    [
+      { badge: 'aa', label: 'Inspected', underline: true },
+      { icon: 'SteeringWheel', label: 'Left hand drive' },
+      { icon: 'Gearbox', label: 'Manual, 4 speed' },
+      { icon: 'Calendar', label: '1985' },
+      { icon: 'Seller', label: 'Private seller' },
+    ],
+    [
+      { badge: 'flag', label: 'London, UK' },
+      { icon: 'Odometer', label: '8,765 miles' },
+      { icon: 'Engine', label: '3200cc' },
+      { icon: 'FuelPump', label: 'Petrol' },
+      { icon: 'PaintDrip', label: 'Red' },
+    ],
+  ],
+  highlights: {
+    heading: 'Highlights',
+    bullets: [
+      'One registered Californian keeper from new',
+      'Highly original and wonderfully preserved state',
+      'Runs well after partial engine restoration',
+      '140bhp fuel injected car with desirable five-speed transmission',
+    ],
+    readMore: 'Read more',
+  },
+  interest: {
+    heading: 'Interest in this vehicle?',
+    description: '350 viewers watching this vehicle.',
+    location: 'Boroughbridge, United Kingdom',
+    specialistInitials: 'IT',
+    specialistName: 'Lewis Hamilton',
+    specialistRole: 'Consignment specialist',
+    contactAction: 'Contact me',
+    viewingAction: 'Request a viewing',
+  },
+  report: {
+    heading: 'AA inspection report',
+    description:
+      'Bid with confidence knowing this vehicle has been independently inspected by the AA.',
+    action: 'Read full report',
+  },
+  insurance: {
+    heading: 'We make buying easier',
+    // The creative is a fixed 361x310 export; the CTA sits in its lower 48px.
+    ctaLabel: 'Get a quote in minutes',
+  },
+  gallery: {
+    heading: 'Gallery',
+    thumbnails: ['Exterior', 'Interior', 'Engine', 'Interior'],
+  },
+  buyerGuide: {
+    heading: 'Buying with Car & Classic',
+    cards: [
+      {
+        icon: 'GuideGavel',
+        heading: 'How bidding works',
+        description: 'All you need to know about the bidding process on Car & Classic',
+      },
+      {
+        icon: 'GuideFiveSteps',
+        heading: 'Five steps to buying',
+        description: 'We make it simple and safe to get the classic of your dreams',
+      },
+      {
+        icon: 'GuideTruck',
+        heading: 'Shipping & transport',
+        description: 'Useful information on collecting your new vehicle',
+      },
+      {
+        icon: 'GuideLock',
+        heading: 'Secure payments',
+        description: 'How we protect you and your money, to make C&C the safest place to transact.',
+      },
+    ],
+  },
+};
