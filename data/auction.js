@@ -81,6 +81,24 @@ export const auction = {
     heading: 'Gallery',
     thumbnails: ['Exterior', 'Interior', 'Engine', 'Interior'],
   },
+  /**
+   * The gallery sheet (Figma 2:7881 video / 2:8090 photos). Both badges on the
+   * hero open the same sheet — they differ only in which tab starts selected.
+   * Every row points at the one committed listing photo; a real listing would
+   * carry its own per-image URLs here.
+   */
+  gallerySheet: {
+    heading: 'Gallery',
+    tabs: [
+      { key: 'video', glyph: 'HeroVideos', label: 'Video' },
+      { key: 'photos', glyph: 'HeroImages', label: 'Photos' },
+    ],
+    categories: [
+      { key: 'exterior', label: 'Exterior', count: 14 },
+      { key: 'interior', label: 'Interior', count: 12 },
+      { key: 'engine', label: 'Engine', count: 8 },
+    ],
+  },
   buyerGuide: {
     heading: 'Buying with Car & Classic',
     cards: [

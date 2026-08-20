@@ -5,47 +5,229 @@
  * then everything else stacked inside a 16pt gutter. Section spacing follows
  * the comp's own rhythm (32pt between blocks inside the listing card, 40pt
  * between the standalone sections below it).
+ *
+ * Two pieces of chrome ride the scroll:
+ *  - the sticky header (2:6651) fades in as the hero leaves, and its tabs jump
+ *    to the anchored sections;
+ *  - the sticky action bar (2:5732) appears once the in-page "Place a bid" has
+ *    gone by, then follows scroll direction using the same armed/accumulator
+ *    logic as the CNC vehicle page's Sell bar.
  */
 
-import { ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  AccessibilityInfo,
+  Animated,
+  Easing,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ActivityCard from '../components/auction/ActivityCard';
 import BidSummary from '../components/auction/BidSummary';
 import BuyerGuide from '../components/auction/BuyerGuide';
 import Gallery from '../components/auction/Gallery';
+import GallerySheet from '../components/auction/GallerySheet';
 import Hero from '../components/auction/Hero';
 import Highlights from '../components/auction/Highlights';
 import InsuranceAd from '../components/auction/InsuranceAd';
 import InterestCard from '../components/auction/InterestCard';
 import ReportCard from '../components/auction/ReportCard';
 import SpecGrid from '../components/auction/SpecGrid';
+import StickyBar from '../components/auction/StickyBar';
+import StickyHeader, { HEADER_BAR, TAB_ROW } from '../components/auction/StickyHeader';
 import TimeBar from '../components/auction/TimeBar';
 import { Button } from '../components/ui';
 import { auction } from '../data/auction';
 import { color, layout, spacing } from '../theme/tokens';
 
+const HERO_HEIGHT = 295;
+
+/**
+ * Overview is the top of the page; the other three map onto real sections.
+ * FAQ points at "Buying with Car & Classic" — the comp has no separate FAQ
+ * block, and that card stack is the page's question-and-answer content.
+ */
+const TABS = [
+  { key: 'overview', label: 'Overview' },
+  { key: 'highlights', label: 'Highlights' },
+  { key: 'gallery', label: 'Gallery' },
+  { key: 'faq', label: 'FAQ' },
+];
+
 export default function AuctionScreen() {
   const insets = useSafeAreaInsets();
+  const scrollRef = useRef(null);
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const lastY = useRef(0);
+
+  const [saved, setSaved] = useState(false);
+  const [sheet, setSheet] = useState(null);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // Section offsets, measured against `body` rather than the page. `bodyY` is
+  // what converts them to page scroll, and both re-fire as images finish
+  // loading and reflow the column — so nothing here is a fixed guess.
+  const anchors = useRef({ overview: 0, highlights: 0, gallery: 0, faq: 0 });
+  const bodyY = useRef(0);
+  // Y of the in-page "Place a bid", which is what arms the sticky bar.
+  const bidY = useRef(0);
+  const pageY = (key) => anchors.current[key] + bodyY.current;
+
+  const [barActive, setBarActive] = useState(false);
+  const [barHeight, setBarHeight] = useState(120);
+  const barArmed = useRef(false);
+  const barAccum = useRef(0);
+  const bar = useRef(new Animated.Value(0)).current;
+
+  const headerTop = insets.top;
+  const headerHeight = headerTop + spacing[3] + HEADER_BAR + spacing[3] + TAB_ROW + spacing[1];
+
+  useEffect(() => {
+    let alive = true;
+    AccessibilityInfo.isReduceMotionEnabled?.().then((on) => {
+      if (alive) setReduceMotion(!!on);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // The header takes over as the hero's last 60pt scroll away, so the
+  // translucent hero chrome and the solid bar never overlap.
+  const handoff = HERO_HEIGHT - headerHeight;
+  const headerOpacity = useMemo(
+    () =>
+      scrollY.interpolate({
+        inputRange: [Math.max(handoff - 60, 0), Math.max(handoff, 1)],
+        outputRange: [0, 1],
+        extrapolate: 'clamp',
+      }),
+    [scrollY, handoff]
+  );
+
+  const [headerShown, setHeaderShown] = useState(false);
+
+  const onScroll = Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+    useNativeDriver: true,
+    listener: (e) => {
+      const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+      const y = contentOffset.y;
+      const dy = y - lastY.current;
+      lastY.current = y;
+
+      const shown = y > Math.max(handoff - 60, 0);
+      setHeaderShown((prev) => (prev === shown ? prev : shown));
+
+      // Active tab = the last anchor the reading position has passed. The
+      // reading position is the viewport top plus the header that covers it.
+      // FAQ is the last section, so it can never be scrolled to the top — the
+      // page runs out first. Hitting the bottom *is* being in it, which also
+      // makes tapping the FAQ tab settle on FAQ rather than snapping back.
+      const atBottom =
+        contentSize.height > 0 &&
+        y + layoutMeasurement.height >= contentSize.height - 4;
+      const probe = y + headerHeight + 1;
+      const current = ['faq', 'gallery', 'highlights'].find(
+        (key) => anchors.current[key] > 0 && probe >= pageY(key)
+      );
+      const next = atBottom ? TABS[TABS.length - 1].key : (current ?? 'overview');
+      setActiveTab((prev) => (prev === next ? prev : next));
+
+      // The sticky bar arms once the in-page bid button is gone, then hides on
+      // a sustained scroll down and returns on any scroll up. The accumulator
+      // keeps a stray pixel from flipping it.
+      const threshold = bidY.current > 0 ? bidY.current + bodyY.current - headerHeight : null;
+      const past = threshold != null && y > threshold;
+      if (!past) {
+        barArmed.current = false;
+        barAccum.current = 0;
+        setBarActive(false);
+      } else if (!barArmed.current) {
+        barArmed.current = true;
+        barAccum.current = 0;
+        setBarActive(true);
+      } else {
+        if ((dy > 0 && barAccum.current < 0) || (dy < 0 && barAccum.current > 0)) {
+          barAccum.current = 0;
+        }
+        barAccum.current += dy;
+        if (barAccum.current > 48) setBarActive(false);
+        else if (barAccum.current < -32) setBarActive(true);
+      }
+    },
+  });
+
+  useEffect(() => {
+    Animated.timing(bar, {
+      toValue: barActive ? 1 : 0,
+      duration: 240,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [barActive, bar]);
+
+  const barTranslate = bar.interpolate({
+    inputRange: [0, 1],
+    outputRange: [barHeight + 24, 0],
+  });
+
+  const goToTab = (key) => {
+    setActiveTab(key);
+    const target = key === 'overview' ? 0 : Math.max(pageY(key) - headerHeight, 0);
+    scrollRef.current?.scrollTo({ y: target, animated: true });
+  };
+
+  const anchor = (key) => (e) => {
+    anchors.current[key] = e.nativeEvent.layout.y;
+  };
+
+  const toggleSave = () => setSaved((prev) => !prev);
 
   return (
     <View style={styles.root}>
-      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+      <StatusBar barStyle={headerShown ? 'dark-content' : 'light-content'} translucent backgroundColor="transparent" />
+
       <ScrollView
+        ref={scrollRef}
         style={styles.scroll}
-        contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + barHeight + spacing[8] }}
         showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={onScroll}
       >
-        <Hero auction={auction} topInset={insets.top} />
+        <Hero
+          auction={auction}
+          topInset={insets.top}
+          saved={saved}
+          onSave={toggleSave}
+          onOpenPhotos={() => setSheet('photos')}
+          onOpenVideos={() => setSheet('video')}
+          onPlay={() => setSheet('video')}
+        />
         <TimeBar countdown={auction.countdown} reserveStatus={auction.reserveStatus} />
 
-        <View style={styles.body}>
+        <View
+          style={styles.body}
+          onLayout={(e) => {
+            bodyY.current = e.nativeEvent.layout.y;
+          }}
+        >
           <BidSummary auction={auction} />
 
           <View style={styles.block}>
             <ActivityCard activity={auction.latestActivity} />
           </View>
 
-          <View style={styles.block}>
+          <View
+            style={styles.block}
+            onLayout={(e) => {
+              bidY.current = e.nativeEvent.layout.y;
+            }}
+          >
             <Button label={auction.primaryAction} variant="primary" height={48} />
           </View>
 
@@ -53,7 +235,7 @@ export default function AuctionScreen() {
             <SpecGrid specs={auction.specs} />
           </View>
 
-          <View style={styles.block}>
+          <View style={styles.block} onLayout={anchor('highlights')}>
             <Highlights highlights={auction.highlights} />
           </View>
 
@@ -69,15 +251,46 @@ export default function AuctionScreen() {
             <InsuranceAd insurance={auction.insurance} />
           </View>
 
-          <View style={styles.section}>
+          <View style={styles.section} onLayout={anchor('gallery')}>
             <Gallery gallery={auction.gallery} />
           </View>
 
-          <View style={styles.section}>
+          <View style={styles.section} onLayout={anchor('faq')}>
             <BuyerGuide buyerGuide={auction.buyerGuide} />
           </View>
         </View>
       </ScrollView>
+
+      <StickyHeader
+        tabs={TABS}
+        activeTab={activeTab}
+        onSelectTab={goToTab}
+        saved={saved}
+        saveCount={auction.saveCount}
+        onSave={toggleSave}
+        opacity={headerOpacity}
+        topInset={insets.top}
+        pointerEvents={headerShown ? 'auto' : 'none'}
+      />
+
+      <StickyBar
+        auction={auction}
+        translateY={barTranslate}
+        bottomInset={insets.bottom}
+        reduceMotion={reduceMotion}
+        onLayout={(e) => setBarHeight(e.nativeEvent.layout.height)}
+        onPlaceBid={() => {}}
+        onRequestViewing={() => {}}
+      />
+
+      <GallerySheet
+        visible={sheet != null}
+        onClose={() => setSheet(null)}
+        gallery={auction.gallerySheet}
+        initialTab={sheet ?? 'photos'}
+        saved={saved}
+        onSave={toggleSave}
+      />
     </View>
   );
 }

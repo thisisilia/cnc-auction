@@ -46,9 +46,13 @@ export const color = {
     // the alpha is raised slightly to keep white glyphs legible over photos.
     neutralBold: 'rgba(51, 51, 51, 0.48)',
     neutralSubtle: 'rgba(51, 51, 51, 0.10)',
+    // Not from Figma: the comp shows sheets in isolation, with no scrim behind.
+    scrim: 'rgba(0, 0, 0, 0.4)',
   },
   // iOS "Colors/Blue" — the live-countdown dot.
   systemBlue: '#007aff',
+  // iOS "Colors/Red" — the saved-heart fill and the sticky bar's urgency dot.
+  systemRed: '#ff2d55',
 };
 
 /** Frame width of the Figma artboard (iPhone 14/15 Pro). */

@@ -10,12 +10,13 @@
 
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Icon } from '../Icon';
 import { color, font, radius, spacing } from '../../theme/tokens';
 
 const HERO_HEIGHT = 295;
 const PILL = 34;
 
-function ChromeButton({ name, label, count, onPress }) {
+function ChromeButton({ glyph, faName, glyphColor, label, count, onPress }) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -27,22 +28,45 @@ function ChromeButton({ name, label, count, onPress }) {
         pressed && styles.pressed,
       ]}
     >
-      <FontAwesome6 name={name} size={17} color={color.icon.inverseBold} iconStyle="solid" />
+      {glyph ? (
+        <Icon name={glyph} size={24} color={glyphColor ?? color.icon.inverseBold} />
+      ) : (
+        <FontAwesome6 name={faName} size={17} color={color.icon.inverseBold} iconStyle="solid" />
+      )}
       {count != null ? <Text style={styles.chromeCount}>{count}</Text> : null}
     </Pressable>
   );
 }
 
-function CountPill({ name, count }) {
+/**
+ * The photo/video counts, pinned to the hero's bottom corners. Each one opens
+ * the gallery sheet on its own tab.
+ */
+function CountPill({ glyph, count, label, onPress }) {
   return (
-    <View style={styles.countPill}>
-      <FontAwesome6 name={name} size={12} color={color.icon.inverseBold} iconStyle="solid" />
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={({ pressed }) => [styles.countPill, pressed && styles.pressed]}
+    >
+      <Icon name={glyph} size={16} color={color.icon.inverseBold} />
       <Text style={styles.countText}>{count}</Text>
-    </View>
+    </Pressable>
   );
 }
 
-export default function Hero({ auction, topInset = 0, onBack, onShare, onSave, onPlay }) {
+export default function Hero({
+  auction,
+  topInset = 0,
+  saved = false,
+  onBack,
+  onShare,
+  onSave,
+  onPlay,
+  onOpenPhotos,
+  onOpenVideos,
+}) {
   return (
     <View style={styles.root}>
       <Image
@@ -53,13 +77,18 @@ export default function Hero({ auction, topInset = 0, onBack, onShare, onSave, o
       />
 
       <View style={[styles.header, { top: topInset + spacing[2] }]}>
-        <ChromeButton name="chevron-left" label="Go back" onPress={onBack} />
+        <ChromeButton faName="chevron-left" label="Go back" onPress={onBack} />
         <View style={styles.headerRight}>
-          <ChromeButton name="arrow-up-from-bracket" label="Share listing" onPress={onShare} />
+          <ChromeButton glyph="HeroShare" label="Share listing" onPress={onShare} />
           <ChromeButton
-            name="heart"
-            label={`Save listing, ${auction.saveCount} saves`}
-            count={auction.saveCount}
+            glyph={saved ? 'HeroSaveFilled' : 'HeroSave'}
+            glyphColor={saved ? color.systemRed : color.icon.inverseBold}
+            label={
+              saved
+                ? `Saved, ${auction.saveCount + 1} saves. Tap to unsave`
+                : `Save listing, ${auction.saveCount} saves`
+            }
+            count={saved ? auction.saveCount + 1 : auction.saveCount}
             onPress={onSave}
           />
         </View>
@@ -81,8 +110,18 @@ export default function Hero({ auction, topInset = 0, onBack, onShare, onSave, o
       </Pressable>
 
       <View style={styles.counts}>
-        <CountPill name="images" count={auction.photoCount} />
-        <CountPill name="video" count={auction.videoCount} />
+        <CountPill
+          glyph="HeroImages"
+          count={auction.photoCount}
+          label={`View all ${auction.photoCount} photos`}
+          onPress={onOpenPhotos}
+        />
+        <CountPill
+          glyph="HeroVideos"
+          count={auction.videoCount}
+          label={`View ${auction.videoCount} video`}
+          onPress={onOpenVideos}
+        />
       </View>
     </View>
   );
