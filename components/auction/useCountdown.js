@@ -11,12 +11,13 @@ function parseCountdown(str) {
   );
 }
 
+/** "50h : 33m : 57s" — each part carries its unit, as the comp labels them. */
 function formatCountdown(total) {
   const pad = (n) => String(n).padStart(2, '0');
   const hours = Math.floor(total / 3600);
   const minutes = Math.floor((total % 3600) / 60);
   const seconds = total % 60;
-  return `${pad(hours)} : ${pad(minutes)} : ${pad(seconds)}`;
+  return `${pad(hours)}h : ${pad(minutes)}m : ${pad(seconds)}s`;
 }
 
 /**
