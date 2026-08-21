@@ -5,10 +5,11 @@
  */
 
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet from '../BottomSheet';
+import { Icon } from '../Icon';
 import { color, font, radius, spacing } from '../../theme/tokens';
 
 const LABEL_PRIMARY = '#333';
@@ -89,6 +90,11 @@ function CommentBlock({ item, nested }) {
 export default function AuctionActivitySheet({ visible, onClose, activity, primaryAction = 'Place a bid', initialTab = 0 }) {
   const insets = useSafeAreaInsets();
   const [tab, setTab] = useState(TABS[initialTab]?.key ?? 'recent');
+  // Each open honours the widget page it was tapped from, so swiping the widget
+  // to Bid history / Comment and tapping lands on that tab — even on reopen.
+  useEffect(() => {
+    if (visible) setTab(TABS[initialTab]?.key ?? 'recent');
+  }, [visible, initialTab]);
   const feed = activity?.feed ?? [];
 
   const counts = {
@@ -124,7 +130,7 @@ export default function AuctionActivitySheet({ visible, onClose, activity, prima
             <Text style={styles.ctaLabel}>{primaryAction}</Text>
           </Pressable>
           <Pressable style={styles.commentBtn} accessibilityRole="button" accessibilityLabel="Add a comment">
-            <FontAwesome6 name="comment" size={20} color={color.text.labelPrimary} iconStyle="regular" />
+            <Icon name="Comments" size={20} color={color.text.labelPrimary} />
           </Pressable>
         </View>
       </View>

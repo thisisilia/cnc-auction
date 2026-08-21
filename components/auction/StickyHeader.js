@@ -9,7 +9,6 @@
  * bar never both read as the page header at once.
  */
 
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Icon } from '../Icon';
@@ -86,12 +85,7 @@ export default function StickyHeader({
           onPress={onBack}
           style={({ pressed }) => [styles.back, pressed && styles.pressed]}
         >
-          <FontAwesome6
-            name="chevron-left"
-            size={17}
-            color={color.icon.neutralBold}
-            iconStyle="solid"
-          />
+          <Icon name="ChevronLeft" size={24} color={color.icon.neutralBold} />
         </Pressable>
 
         <View style={styles.barRight}>

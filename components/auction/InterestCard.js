@@ -3,7 +3,6 @@
  * consignment specialist, and the two ways to reach them.
  */
 
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Icon } from '../Icon';
 import { Button, Card } from '../ui';
@@ -50,9 +49,7 @@ export default function InterestCard({ interest, onContact, onRequestViewing }) 
         label={interest.viewingAction}
         style={styles.viewingButton}
         onPress={onRequestViewing}
-        icon={
-          <FontAwesome6 name="eye" size={18} color={color.icon.labelPrimary} iconStyle="solid" />
-        }
+        icon={<Icon name="Eye" size={18} color={color.icon.labelPrimary} />}
       />
     </Card>
   );

@@ -6,7 +6,7 @@
  * Tapping opens the full activity sheet on the matching tab.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card } from '../ui';
 import { color, font, radius, spacing } from '../../theme/tokens';
@@ -86,11 +86,43 @@ export default function ActivityCard({ activity, onOpen }) {
     })
   ).current;
 
+  // Web: a two-finger horizontal trackpad swipe (a wheel event with dominant
+  // deltaX) pages the widget too. Touch/native keeps the PanResponder swipe.
+  const innerRef = useRef(null);
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const node = innerRef.current;
+    if (!node || !node.addEventListener) return undefined;
+    let accum = 0;
+    let cooling = false;
+    let resetTimer = null;
+    const onWheel = (e) => {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // vertical → let the page scroll
+      e.preventDefault();
+      if (cooling) return;
+      accum += e.deltaX;
+      if (resetTimer) clearTimeout(resetTimer);
+      resetTimer = setTimeout(() => {
+        accum = 0;
+      }, 180);
+      if (Math.abs(accum) > 30) {
+        swipeRef.current(accum > 0 ? 1 : -1);
+        accum = 0;
+        cooling = true;
+        setTimeout(() => {
+          cooling = false;
+        }, 400);
+      }
+    };
+    node.addEventListener('wheel', onWheel, { passive: false });
+    return () => node.removeEventListener('wheel', onWheel);
+  }, []);
+
   const page = pages[index];
 
   return (
     <Card style={styles.root}>
-      <View style={styles.inner} {...pan.panHandlers}>
+      <View ref={innerRef} style={styles.inner} {...pan.panHandlers}>
         <Pressable
           onPress={() => onOpen?.(indexRef.current)}
           accessibilityRole="button"
