@@ -4,6 +4,37 @@ Releases of the Car & Classic auction detail page. Each entry mirrors the
 [GitHub release](https://github.com/thisisilia/cnc-auction/releases) of the same
 tag; the deployed build lives at https://cnc-auction-azure.vercel.app/
 
+## v1.1.1
+
+The page kept its figures in several places at once, so they had drifted apart.
+They all read the activity feed now.
+
+### Counts
+
+- **Recent** counted top-level feed rows and read 7 against Bid history 4 and
+  Comment 4. It renders replies too, and because replies nest rather than append,
+  posting one left the tally unmoved. Recent is the two totals added: **8**
+- **Headline stats** said `13 Bids` / `6 Comments`, written out by hand — now
+  counted off the feed like the widget and the sheet
+- **Widget previews** were hardcoded rows: a £32,000 bid the feed does not
+  contain, and "I pity the fool…" credited to RB when BA_Baracus wrote it. Each
+  page now previews the newest matching entry from the feed
+- One bidder appeared as both `Rick••••` and `Ricky••••`, which made four bids
+  look like four separate bidders
+
+### Figures the comp disagreed with itself on
+
+- The feed's newest bid was £40,000, sitting above the £35,250 it is the Current
+  Bid for — the bid is now £35,250
+- The interest card claimed 350 viewers against the stats row's 320 — both 320
+- The gallery categories totalled 42 against the hero badge's 34 photos — split
+  12 / 10 / 6 / 6, the comp's own shape scaled to the real total
+
+### Feed
+
+- Put back in order: a comment at 2 mins sat below a bid at 5 mins, and a reply
+  at 10 mins answered a comment posted 2 mins ago
+
 ## v1.1.0
 
 Media viewers, a working comment thread, and a pass over typography.
