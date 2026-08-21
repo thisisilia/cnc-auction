@@ -6,9 +6,10 @@
 
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet from '../BottomSheet';
+import SendButton from '../SendButton';
 import { Icon } from '../Icon';
 import { color, font, radius, spacing } from '../../theme/tokens';
 
@@ -36,8 +37,8 @@ function TabButton({ tab, count, active, onPress }) {
   return (
     <Pressable style={styles.tab} onPress={onPress} accessibilityRole="tab" accessibilityState={{ selected: active }}>
       <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>{tab.label}</Text>
-      <View style={styles.tabBadge}>
-        <Text style={styles.tabBadgeLabel}>{count}</Text>
+      <View style={[styles.tabBadge, active && styles.tabBadgeActive]}>
+        <Text style={[styles.tabBadgeLabel, active && styles.tabBadgeLabelActive]}>{count}</Text>
       </View>
       {active ? <View style={styles.tabUnderline} /> : null}
     </Pressable>
@@ -121,6 +122,42 @@ function groupRuns(items) {
   }, []);
 }
 
+/**
+ * Comment composer — Figma 387:3138. Avatar, a rounded field and the paperclip;
+ * the send button only appears once there is something to send, so the resting
+ * state stays the quiet placeholder the comp shows.
+ */
+function CommentComposer({ value, onChange, onSend, autoFocus, onFocus }) {
+  return (
+    <View style={styles.composer}>
+      <Avatar initials="IT" size={34} />
+      <View style={styles.field}>
+        <TextInput
+          style={styles.input}
+          value={value}
+          onChangeText={onChange}
+          onFocus={onFocus}
+          autoFocus={autoFocus}
+          placeholder="Add a comment"
+          placeholderTextColor={color.text.neutralRegular}
+          accessibilityLabel="Add a comment"
+          returnKeyType="send"
+          onSubmitEditing={onSend}
+          multiline={false}
+        />
+        <Pressable accessibilityRole="button" accessibilityLabel="Attach a photo" style={styles.attach}>
+          <Icon name="Attach" size={24} color={color.text.labelPrimary} />
+        </Pressable>
+      </View>
+      {value.trim() ? (
+        <Pressable accessibilityRole="button" accessibilityLabel="Send comment" onPress={onSend}>
+          <SendButton size={34} />
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
 export default function AuctionActivitySheet({ visible, onClose, activity, primaryAction = 'Place a bid', initialTab = 0 }) {
   const insets = useSafeAreaInsets();
   const [tab, setTab] = useState(TABS[initialTab]?.key ?? 'recent');
@@ -130,6 +167,26 @@ export default function AuctionActivitySheet({ visible, onClose, activity, prima
     if (visible) setTab(TABS[initialTab]?.key ?? 'recent');
   }, [visible, initialTab]);
   const feed = activity?.feed ?? [];
+  // The composer takes over the footer while a comment is being written; the
+  // Comment tab shows it at rest too.
+  const [composing, setComposing] = useState(false);
+  const [draft, setDraft] = useState('');
+  const send = () => {
+    setDraft('');
+    setComposing(false);
+  };
+  useEffect(() => {
+    if (!visible) {
+      setComposing(false);
+      setDraft('');
+    }
+  }, [visible]);
+  // Changing tab leaves the composer, so Recent and Bid history go back to
+  // their own footers. The draft survives — it is only out of sight, and
+  // reopening the composer picks it back up rather than losing what was typed.
+  useEffect(() => {
+    setComposing(false);
+  }, [tab]);
 
   const counts = {
     recent: feed.length,
@@ -170,13 +227,41 @@ export default function AuctionActivitySheet({ visible, onClose, activity, prima
           )}
         </ScrollView>
 
-        <View style={[styles.footer, { paddingBottom: (insets.bottom || 0) + spacing[8] }]}>
-          <Pressable style={styles.cta} accessibilityRole="button" accessibilityLabel={primaryAction}>
-            <Text style={styles.ctaLabel}>{primaryAction}</Text>
-          </Pressable>
-          <Pressable style={styles.commentBtn} accessibilityRole="button" accessibilityLabel="Add a comment">
-            <Icon name="Comments" size={20} color={color.text.labelPrimary} />
-          </Pressable>
+        <View
+          style={[
+            styles.footer,
+            // The comp sets the composer on a subtle bar so the white field
+            // reads as a field rather than as more sheet.
+            (composing || tab === 'comments') && styles.footerComposing,
+            { paddingBottom: (insets.bottom || 0) + spacing[8] },
+          ]}
+        >
+          {composing || tab === 'comments' ? (
+            <CommentComposer
+              value={draft}
+              onChange={setDraft}
+              onSend={send}
+              autoFocus={composing}
+              onFocus={() => setComposing(true)}
+            />
+          ) : (
+            <>
+              <Pressable style={styles.cta} accessibilityRole="button" accessibilityLabel={primaryAction}>
+                <Text style={styles.ctaLabel}>{primaryAction}</Text>
+              </Pressable>
+              {/* Bid history is about bidding alone, so it keeps the one action. */}
+              {tab === 'recent' ? (
+                <Pressable
+                  style={styles.commentBtn}
+                  accessibilityRole="button"
+                  accessibilityLabel="Add a comment"
+                  onPress={() => setComposing(true)}
+                >
+                  <Icon name="Comments" size={20} color={color.text.labelPrimary} />
+                </Pressable>
+              ) : null}
+            </>
+          )}
         </View>
       </View>
     </BottomSheet>
@@ -193,8 +278,8 @@ const styles = StyleSheet.create({
     borderBottomColor: color.border.neutralSubtle,
   },
   tab: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: spacing[3] },
-  tabLabel: { ...font.calloutEmphasized, color: color.text.neutralRegular },
-  tabLabelActive: { color: LABEL_PRIMARY },
+  tabLabel: { ...font.calloutEmphasized, color: color.text.tabInactive },
+  tabLabelActive: { color: color.text.tabActive },
   tabBadge: {
     minWidth: 20,
     height: 20,
@@ -205,7 +290,10 @@ const styles = StyleSheet.create({
     backgroundColor: color.background.neutralMuted,
   },
   tabBadgeLabel: { ...font.footnoteEmphasized, color: LABEL_PRIMARY },
-  tabUnderline: { position: 'absolute', left: 0, right: 0, bottom: -1, height: 2, borderRadius: 2, backgroundColor: color.background.inverseBold },
+  // The selected tab's badge inverts onto the active colour.
+  tabBadgeActive: { backgroundColor: color.background.tabActive },
+  tabBadgeLabelActive: { color: color.text.inverseBold },
+  tabUnderline: { position: 'absolute', left: 0, right: 0, bottom: -1, height: 2, borderRadius: 2, backgroundColor: color.background.tabActive },
   feed: { flex: 1 },
   feedContent: { paddingHorizontal: spacing[4], paddingVertical: spacing[3], gap: spacing[4] },
   bidCard: {
@@ -246,4 +334,24 @@ const styles = StyleSheet.create({
   cta: { flex: 1, height: 52, borderRadius: radius.lg, alignItems: 'center', justifyContent: 'center', backgroundColor: color.background.brandPrimaryRegular },
   ctaLabel: { ...font.calloutEmphasized, color: color.text.inverseBold },
   commentBtn: { width: 52, height: 52, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center', backgroundColor: color.background.neutralSubtle },
+  footerComposing: { backgroundColor: color.background.neutralSubtle },
+  composer: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
+  field: {
+    flex: 1,
+    height: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: spacing[4],
+    paddingRight: spacing[2],
+    borderRadius: radius.full,
+    backgroundColor: color.background.neutralWhite,
+  },
+  input: {
+    flex: 1,
+    ...font.subheadlineRegular,
+    color: LABEL_PRIMARY,
+    // Strips the focus ring react-native-web puts on a web input.
+    outlineStyle: 'none',
+  },
+  attach: { paddingLeft: spacing[2] },
 });

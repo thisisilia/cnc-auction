@@ -15,7 +15,6 @@ import { Icon } from '../Icon';
 import { color, font, radius, spacing } from '../../theme/tokens';
 
 // Inactive tab colour — Figma "highlight" grey.
-const TAB_INACTIVE = '#A4A9A4';
 
 export const HEADER_BAR = 34;
 export const TAB_ROW = 29;
@@ -182,17 +181,17 @@ const styles = StyleSheet.create({
   // switching active never reflows the row (no weight jump).
   tabLabel: {
     ...font.calloutEmphasized,
-    color: TAB_INACTIVE,
+    color: color.text.tabInactive,
   },
   tabLabelActive: {
-    color: color.text.neutralBold,
+    color: color.text.tabActive,
   },
   underline: {
     position: 'absolute',
     bottom: 0,
     height: 2,
     borderRadius: 1,
-    backgroundColor: color.background.inverseBold,
+    backgroundColor: color.background.tabActive,
   },
   pressed: {
     opacity: 0.6,

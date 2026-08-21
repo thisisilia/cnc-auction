@@ -16,6 +16,9 @@ export const color = {
     // iOS "Labels/Primary" — the auction page sets most copy in this rather
     // than semantic/text/neutral/bold, so it is kept as its own token.
     labelPrimary: '#333333',
+    // Selected tab label; the unselected one is `tabInactive`.
+    tabActive: '#1c371c',
+    tabInactive: '#a4a9a4',
   },
   icon: {
     neutralBold: '#1e1f1e',
@@ -35,6 +38,9 @@ export const color = {
     neutralMuted: '#e5e5e5',
     // iOS "Grays/Gray 4" — the Pre bid tag, which must not read as a live bid.
     gray4: '#d1d1d6',
+    // Selected tab: the label, its underline and its count badge. Shared by the
+    // sticky page header and the activity sheet so the two cannot drift.
+    tabActive: '#1c371c',
     inverseBold: '#1e1f1e',
     // Not from Figma: fills the gutter beside the phone frame on web only.
     pageBackdrop: '#e8ebe8',
