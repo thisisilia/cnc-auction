@@ -14,7 +14,7 @@ export default function TimeBar({ countdown, reserveStatus, reduceMotion = false
   return (
     <View style={styles.root}>
       <View style={styles.countdown}>
-        <PulsingDot dotColor={color.systemBlue} reduceMotion={reduceMotion} />
+        <PulsingDot dotColor={color.systemRed} reduceMotion={reduceMotion} />
         <Text style={styles.countdownLabel}>{live}</Text>
       </View>
       <View style={styles.reservePill}>

@@ -12,10 +12,11 @@ function parseCountdown(str) {
 }
 
 function formatCountdown(total) {
-  const days = Math.floor(total / 86400);
-  const hours = Math.floor((total % 86400) / 3600);
+  const pad = (n) => String(n).padStart(2, '0');
+  const hours = Math.floor(total / 3600);
   const minutes = Math.floor((total % 3600) / 60);
-  return `${days}d : ${hours}h : ${minutes}m`;
+  const seconds = total % 60;
+  return `${pad(hours)} : ${pad(minutes)} : ${pad(seconds)}`;
 }
 
 /**

@@ -115,7 +115,7 @@ export default function StickyBar({
     >
       <View style={styles.countdownRow}>
         <View style={styles.countdown}>
-          <PulsingDot dotColor={color.systemBlue} reduceMotion={reduceMotion} />
+          <PulsingDot dotColor={color.systemRed} reduceMotion={reduceMotion} />
           <Text style={styles.countdownLabel}>{countdown}</Text>
         </View>
         <View style={styles.reserveChip}>
