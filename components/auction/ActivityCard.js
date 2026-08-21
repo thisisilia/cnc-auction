@@ -53,6 +53,23 @@ function isPreBid(tag) {
 
 export default function ActivityCard({ activity, onOpen }) {
   const pages = activity.pages;
+  // Derived from the same feed the sheet counts, so the widget cannot claim a
+  // different number of bids or comments than the sheet it opens.
+  const feed = activity.feed ?? [];
+  const bidCount = feed.filter((i) => i.type === 'bid').length;
+  const commentCount = feed.filter((i) => i.type === 'comment').length;
+  const bidders = new Set(feed.filter((i) => i.type === 'bid').map((i) => i.name)).size;
+  const subheadingFor = (key) => {
+    if (key === 'bids') {
+      return `${bidCount} ${bidCount === 1 ? 'Bid' : 'Bids'} from ${bidders} ${
+        bidders === 1 ? 'bidder' : 'bidders'
+      }`;
+    }
+    if (key === 'comments') {
+      return `${commentCount} ${commentCount === 1 ? 'Comment' : 'Comments'}`;
+    }
+    return null;
+  };
   const [index, setIndex] = useState(0);
   const indexRef = useRef(0);
   indexRef.current = index;
@@ -151,7 +168,9 @@ export default function ActivityCard({ activity, onOpen }) {
           <View style={styles.header}>
             <Animated.View style={[styles.headingRow, { opacity }]}>
               <Text style={styles.heading}>{page.heading}</Text>
-              {page.subheading ? <Text style={styles.subheading}>{page.subheading}</Text> : null}
+              {subheadingFor(page.key) ? (
+                <Text style={styles.subheading}>{subheadingFor(page.key)}</Text>
+              ) : null}
             </Animated.View>
             <View style={styles.dots}>
               {pages.map((_, i) => (

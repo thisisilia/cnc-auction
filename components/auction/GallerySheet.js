@@ -233,7 +233,7 @@ export default function GallerySheet({
   // Photos scroll, so that tab fills the sheet; the single video hugs its own
   // height instead of leaving a big empty gap below it.
   return (
-    <BottomSheet visible={visible} onClose={onClose} fill={tab !== 'video'} topInset={60}>
+    <BottomSheet visible={visible} onClose={onClose} fill topInset={60}>
       <View style={styles.header}>
         <Text style={styles.heading}>{gallery.heading}</Text>
         <View style={styles.headerActions}>
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     ...font.title3Emphasized,
-    color: color.text.neutralBold,
+    color: color.text.labelPrimary,
   },
   headerActions: {
     flexDirection: 'row',

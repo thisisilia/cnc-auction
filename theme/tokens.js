@@ -141,6 +141,7 @@ const family = { fontFamily: fontFamily.display };
 
 export const font = {
   title2Emphasized: { fontSize: 22, lineHeight: 28, fontWeight: '600', ...family },
+  title3Emphasized: { fontSize: 20, lineHeight: 25, fontWeight: '600', ...family },
   headlineEmphasized: { fontSize: 18, lineHeight: 24, fontWeight: '600', ...family },
   calloutRegular: { fontSize: 16, lineHeight: 21, fontWeight: '400', ...family },
   calloutEmphasized: { fontSize: 16, lineHeight: 21, fontWeight: '600', ...family },

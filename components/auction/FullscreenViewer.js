@@ -33,7 +33,7 @@ function Chip({ glyph, glyphColor, count, label, onPress }) {
       onPress={onPress}
       style={({ pressed }) => [styles.chip, count != null && styles.chipWide, pressed && styles.pressed]}
     >
-      <Icon name={glyph} size={24} color={glyphColor ?? color.icon.inverseBold} />
+      <Icon name={glyph} size={16} color={glyphColor ?? color.icon.inverseBold} />
       {count != null ? <Text style={styles.chipCount}>{count}</Text> : null}
     </Pressable>
   );

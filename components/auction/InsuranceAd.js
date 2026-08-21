@@ -14,8 +14,9 @@
  */
 
 import { Image, StyleSheet, View } from 'react-native';
+import { Icon } from '../Icon';
 import { Button, SectionHeading } from '../ui';
-import { radius, spacing } from '../../theme/tokens';
+import { color, radius, spacing } from '../../theme/tokens';
 
 const CARD_WIDTH = 361;
 const CARD_HEIGHT = 310;
@@ -45,6 +46,7 @@ export default function InsuranceAd({ insurance, onGetQuote }) {
             variant="primary"
             style={styles.ctaButton}
             onPress={onGetQuote}
+            iconAfter={<Icon name="ArrowRight" size={20} color={color.icon.inverseBold} />}
           />
         </View>
       </View>
@@ -72,6 +74,6 @@ const styles = StyleSheet.create({
   ctaButton: {
     flex: 1,
     height: '100%',
-    borderRadius: radius.md,
+    borderRadius: radius.xl,
   },
 });

@@ -136,7 +136,15 @@ export default function Hero({
               >
                 <PlayButton size={64} />
               </Pressable>
-            ) : null}
+            ) : (
+              // The photo itself opens the gallery, not just the badge over it.
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`View photo ${item.index} full screen`}
+                onPress={onOpenPhotos}
+                style={StyleSheet.absoluteFill}
+              />
+            )}
           </View>
         ))}
       </ScrollView>
@@ -144,10 +152,10 @@ export default function Hero({
       <View style={[styles.header, { top: topInset + spacing[2] }]} pointerEvents="box-none">
         <ChromeButton glyph="ChevronLeft" label="Go back" onPress={onBack} />
         <View style={styles.headerRight}>
-          <ChromeButton glyph="HeroShare" glyphSize={20} label="Share listing" onPress={onShare} />
+          <ChromeButton glyph="HeroShare" glyphSize={16} label="Share listing" onPress={onShare} />
           <ChromeButton
             glyph={saved ? 'HeroSaveFilled' : 'HeroSave'}
-            glyphSize={20}
+            glyphSize={16}
             glyphColor={saved ? color.systemRed : color.icon.inverseBold}
             label={
               saved

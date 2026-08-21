@@ -16,7 +16,7 @@ export function SectionHeading({ children, style }) {
  *  - 'tonal'   — neutral-regular fill, used for every secondary action
  *  - 'outline' — brand-green hairline on white, used for "Read more"
  */
-export function Button({ label, variant = 'tonal', icon, height = 44, style, onPress }) {
+export function Button({ label, variant = 'tonal', icon, iconAfter, height = 44, style, onPress }) {
   const isPrimary = variant === 'primary';
   const isOutline = variant === 'outline';
   return (
@@ -43,6 +43,7 @@ export function Button({ label, variant = 'tonal', icon, height = 44, style, onP
       >
         {label}
       </Text>
+      {iconAfter}
     </Pressable>
   );
 }

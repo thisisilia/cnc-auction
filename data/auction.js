@@ -32,10 +32,9 @@ export const auction = {
   activity: {
     pages: [
       { key: 'recent', heading: 'Live auction activities', type: 'bid', initials: 'UN', name: 'RickyBobby', tag: 'Bid', amount: '£32,000' },
-      { key: 'bids', heading: 'Bid history', subheading: '4 Bids from 3 bidders', type: 'bid', initials: 'UN', name: 'User_Na••••', tag: 'Pre bid', amount: '£32,000' },
-      { key: 'comments', heading: 'Comments', subheading: '22', type: 'comment', initials: 'RB', text: 'I pity the fool who outbids me. I’m going to buy...' },
+      { key: 'bids', heading: 'Bid history', type: 'bid', initials: 'UN', name: 'User_Na••••', tag: 'Pre bid', amount: '£32,000' },
+      { key: 'comments', heading: 'Comments', type: 'comment', initials: 'RB', text: 'I pity the fool who outbids me. I’m going to buy...' },
     ],
-    counts: { recent: 8, bids: 4, comments: 4 },
     // Interleaved feed for the sheet's Recent tab; split by type for the others.
     feed: [
       { id: 'b1', type: 'bid', verified: true, initials: 'RB', name: 'Rick••••', time: 'Just now', amount: '£40,000', tag: 'Bid' },
