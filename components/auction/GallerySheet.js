@@ -16,6 +16,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../BottomSheet';
+import VideoPlayer from './VideoPlayer';
 import { Icon } from '../Icon';
 import PlayButton from '../PlayButton';
 import { color, font, radius, spacing } from '../../theme/tokens';
@@ -57,15 +58,29 @@ function Tab({ tab, active, onPress }) {
   );
 }
 
-function VideoBody() {
+/**
+ * Poster until the play button is hit, then the player with its control bar
+ * (Figma 2:7979). Expand hands off to the fullscreen viewer.
+ */
+function VideoBody({ onExpand }) {
+  const [playing, setPlaying] = useState(false);
   return (
     <View style={styles.body}>
-      <View style={styles.videoFrame}>
-        <Image source={PHOTO} style={styles.videoImage} resizeMode="cover" />
-        <View style={styles.playButton}>
-          <PlayButton size={64} />
+      {playing ? (
+        <VideoPlayer source={PHOTO} style={styles.videoFrame} onExpand={onExpand} />
+      ) : (
+        <View style={styles.videoFrame}>
+          <Image source={PHOTO} style={styles.videoImage} resizeMode="cover" />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Play walkaround video"
+            onPress={() => setPlaying(true)}
+            style={({ pressed }) => [styles.playButton, pressed && styles.pressed]}
+          >
+            <PlayButton size={64} />
+          </Pressable>
         </View>
-      </View>
+      )}
     </View>
   );
 }
@@ -75,7 +90,7 @@ function VideoBody() {
  * is captured by onLayout, so the jump waits for the row to exist rather than
  * assuming a fixed height.
  */
-function PhotosBody({ categories, focusCategory }) {
+function PhotosBody({ categories, focusCategory, onOpenPhoto }) {
   const scrollRef = useRef(null);
   const rowRefs = useRef({});
   const scrollY = useRef(0);
@@ -173,13 +188,20 @@ function PhotosBody({ categories, focusCategory }) {
                 contentContainerStyle={styles.row}
           >
             {Array.from({ length: category.count }).map((_, index) => (
-              <Image
+              <Pressable
                 key={index}
-                source={PHOTO}
-                style={styles.rowImage}
-                resizeMode="cover"
-                accessibilityIgnoresInvertColors
-              />
+                accessibilityRole="button"
+                accessibilityLabel={`View ${category.label} photo ${index + 1} full screen`}
+                onPress={() => onOpenPhoto?.(category, index)}
+                style={({ pressed }) => pressed && styles.pressed}
+              >
+                <Image
+                  source={PHOTO}
+                  style={styles.rowImage}
+                  resizeMode="cover"
+                  accessibilityIgnoresInvertColors
+                />
+              </Pressable>
             ))}
           </ScrollView>
         </View>
@@ -197,6 +219,8 @@ export default function GallerySheet({
   saved = false,
   onSave,
   onShare,
+  onOpenPhoto,
+  onExpandVideo,
 }) {
   const [tab, setTab] = useState(initialTab);
 
@@ -243,9 +267,13 @@ export default function GallerySheet({
       </View>
 
       {tab === 'video' ? (
-        <VideoBody />
+        <VideoBody onExpand={onExpandVideo} />
       ) : (
-        <PhotosBody categories={gallery.categories} focusCategory={visible ? focusCategory : null} />
+        <PhotosBody
+          categories={gallery.categories}
+          focusCategory={visible ? focusCategory : null}
+          onOpenPhoto={onOpenPhoto}
+        />
       )}
     </BottomSheet>
   );

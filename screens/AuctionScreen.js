@@ -30,7 +30,9 @@ import AuctionActivitySheet from '../components/auction/AuctionActivitySheet';
 import BidSummary from '../components/auction/BidSummary';
 import BuyerGuide from '../components/auction/BuyerGuide';
 import Gallery from '../components/auction/Gallery';
+import FullscreenViewer from '../components/auction/FullscreenViewer';
 import GallerySheet from '../components/auction/GallerySheet';
+import VideoPlayer from '../components/auction/VideoPlayer';
 import Hero from '../components/auction/Hero';
 import Highlights from '../components/auction/Highlights';
 import InsuranceAd from '../components/auction/InsuranceAd';
@@ -92,6 +94,8 @@ export default function AuctionScreen() {
   const [saved, setSaved] = useState(false);
   const [sheet, setSheet] = useState(null);
   const [sheetCategory, setSheetCategory] = useState(null);
+  // { items, index, title } while the fullscreen viewer is open.
+  const [viewer, setViewer] = useState(null);
   const [highlightsOpen, setHighlightsOpen] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
@@ -369,6 +373,26 @@ export default function AuctionScreen() {
       />
 
       <GallerySheet
+        onOpenPhoto={(category, index) =>
+          setViewer({
+            kind: 'photo',
+            title: category.label,
+            index,
+            items: Array.from({ length: category.count }, (_, i) => ({
+              key: `${category.key}-${i}`,
+              title: category.label,
+              source: HERO_PHOTO,
+            })),
+          })
+        }
+        onExpandVideo={() =>
+          setViewer({
+            kind: 'video',
+            title: 'Videos',
+            index: 0,
+            items: [{ key: 'video', title: 'Videos', source: HERO_PHOTO }],
+          })
+        }
         visible={sheet != null}
         onClose={() => setSheet(null)}
         gallery={auction.gallerySheet}
@@ -376,6 +400,24 @@ export default function AuctionScreen() {
         focusCategory={sheetCategory}
         saved={saved}
         onSave={toggleSave}
+      />
+
+      <FullscreenViewer
+        visible={viewer != null}
+        onClose={() => setViewer(null)}
+        title={viewer?.title}
+        items={viewer?.items ?? []}
+        initialIndex={viewer?.index ?? 0}
+        saved={saved}
+        saveCount={auction.saveCount}
+        onSave={toggleSave}
+        renderItem={
+          viewer?.kind === 'video'
+            ? (item) => (
+                <VideoPlayer source={item.source} style={styles.viewerVideo} showExpand={false} />
+              )
+            : undefined
+        }
       />
 
       <AuctionActivitySheet
@@ -406,5 +448,11 @@ const styles = StyleSheet.create({
   },
   section: {
     marginTop: spacing[8],
+  },
+  // The fullscreen video keeps the comp's 16:9 letterbox on the black field.
+  viewerVideo: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    borderRadius: 0,
   },
 });
