@@ -119,10 +119,10 @@ export default function StickyBar({
         {
           transform: [{ translateY }],
           opacity,
-          // Clear the home indicator where there is one; on web the inset is 0
-          // and forcing a fixed 32 here just reads as dead space under the
-          // buttons, which is the gap that shows at the foot of the page.
-          paddingBottom: bottomInset || spacing[2],
+          // 24 below the buttons, per the comp's 112pt Sticky (36 countdown +
+          // 8 + 44 button + 24). On a device the home-indicator inset is
+          // larger, so it wins.
+          paddingBottom: Math.max(bottomInset, spacing[6]),
         },
       ]}
     >
