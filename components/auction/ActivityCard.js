@@ -27,8 +27,8 @@ function BidRow({ item }) {
       <Text style={styles.name} numberOfLines={1}>
         {item.name}
       </Text>
-      <View style={styles.tag}>
-        <Text style={styles.tagText}>{item.tag}</Text>
+      <View style={[styles.tag, isPreBid(item.tag) && styles.tagPre]}>
+        <Text style={[styles.tagText, isPreBid(item.tag) && styles.tagTextPre]}>{item.tag}</Text>
       </View>
       <Text style={styles.amount}>{item.amount}</Text>
     </View>
@@ -44,6 +44,11 @@ function CommentRow({ item }) {
       </Text>
     </View>
   );
+}
+
+/** "Pre bid" in any casing; anything else is treated as a live bid. */
+function isPreBid(tag) {
+  return /pre/i.test(tag ?? '');
 }
 
 export default function ActivityCard({ activity, onOpen }) {
@@ -232,6 +237,10 @@ const styles = StyleSheet.create({
     // #333 on the green fill is unreadable; the label goes inverse with it.
     color: color.text.inverseBold,
   },
+  // A pre bid is not a live bid, so it drops the brand green for a neutral
+  // chip — matching the same tag in the activity sheet's bid rows.
+  tagPre: { backgroundColor: color.background.gray4 },
+  tagTextPre: { color: color.text.labelPrimary },
   amount: {
     ...font.calloutEmphasized,
     color: color.text.labelPrimary,

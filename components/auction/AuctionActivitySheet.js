@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   bidTime: { ...font.bodyXsRegular, color: color.text.neutralRegular, minWidth: 52, textAlign: 'right' },
   bidTag: { backgroundColor: color.background.successBold, borderRadius: 4, paddingHorizontal: 4, paddingVertical: 2 },
   bidTagLabel: { ...font.caption2Emphasized, color: color.text.inverseBold },
-  bidTagPre: { backgroundColor: color.background.neutralMuted },
+  bidTagPre: { backgroundColor: color.background.gray4 },
   bidTagLabelPre: { color: LABEL_PRIMARY },
   comment: { gap: 4 },
   commentNested: { marginLeft: spacing[6], paddingLeft: spacing[3], borderLeftWidth: 1, borderLeftColor: color.border.neutralSubtle },

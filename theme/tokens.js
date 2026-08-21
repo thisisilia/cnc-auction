@@ -33,6 +33,8 @@ export const color = {
     successBold: '#34a14f',
     // hsla(0, 0%, 90%, 1) — the count badges on the activity sheet's tabs.
     neutralMuted: '#e5e5e5',
+    // iOS "Grays/Gray 4" — the Pre bid tag, which must not read as a live bid.
+    gray4: '#d1d1d6',
     inverseBold: '#1e1f1e',
     // Not from Figma: fills the gutter beside the phone frame on web only.
     pageBackdrop: '#e8ebe8',

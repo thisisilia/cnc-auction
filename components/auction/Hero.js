@@ -35,7 +35,7 @@ const PILL = 34;
 /** Most dots the indicator ever shows, however many pages there are. */
 const DOTS = 3;
 
-function ChromeButton({ glyph, glyphColor, label, count, onPress }) {
+function ChromeButton({ glyph, glyphColor, glyphSize = 24, label, count, onPress }) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -47,7 +47,7 @@ function ChromeButton({ glyph, glyphColor, label, count, onPress }) {
         pressed && styles.pressed,
       ]}
     >
-      <Icon name={glyph} size={24} color={glyphColor ?? color.icon.inverseBold} />
+      <Icon name={glyph} size={glyphSize} color={glyphColor ?? color.icon.inverseBold} />
       {count != null ? <Text style={styles.chromeCount}>{count}</Text> : null}
     </Pressable>
   );
@@ -144,9 +144,10 @@ export default function Hero({
       <View style={[styles.header, { top: topInset + spacing[2] }]} pointerEvents="box-none">
         <ChromeButton glyph="ChevronLeft" label="Go back" onPress={onBack} />
         <View style={styles.headerRight}>
-          <ChromeButton glyph="HeroShare" label="Share listing" onPress={onShare} />
+          <ChromeButton glyph="HeroShare" glyphSize={20} label="Share listing" onPress={onShare} />
           <ChromeButton
             glyph={saved ? 'HeroSaveFilled' : 'HeroSave'}
+            glyphSize={20}
             glyphColor={saved ? color.systemRed : color.icon.inverseBold}
             label={
               saved
