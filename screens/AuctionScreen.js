@@ -39,6 +39,7 @@ import ReportCard from '../components/auction/ReportCard';
 import SpecGrid from '../components/auction/SpecGrid';
 import StickyBar from '../components/auction/StickyBar';
 import StickyHeader, { HEADER_BAR, TAB_ROW } from '../components/auction/StickyHeader';
+import { useSmoothScroll } from '../components/useSmoothScroll';
 import TimeBar from '../components/auction/TimeBar';
 import { Button } from '../components/ui';
 import { auction } from '../data/auction';
@@ -76,6 +77,8 @@ export default function AuctionScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
   const lastY = useRef(0);
 
+  // Eased wheel scrolling on web; a no-op on device, which has its own inertia.
+  // Suspended while a sheet is open so the sheet's scroller keeps the wheel.
   const [saved, setSaved] = useState(false);
   const [sheet, setSheet] = useState(null);
   const [sheetCategory, setSheetCategory] = useState(null);
@@ -219,6 +222,8 @@ export default function AuctionScreen() {
   const anchor = (key) => (e) => {
     anchors.current[key] = e.nativeEvent.layout.y;
   };
+
+  useSmoothScroll(scrollRef, { enabled: sheet == null });
 
   const toggleSave = () => setSaved((prev) => !prev);
 
