@@ -84,18 +84,22 @@ function RecentBid({ item }) {
   const pre = isPreBid(item.tag);
   return (
     <View style={styles.recentBid}>
-      <View style={styles.recentBidTop}>
-        <Avatar initials={item.initials} />
-        <Text style={styles.bidName} numberOfLines={1}>
-          {item.name}
-        </Text>
-        {item.verified ? <Icon name="Verified" size={14} color={VERIFIED} /> : null}
-        <Text style={styles.bidTime}>{item.time}</Text>
-      </View>
-      <View style={styles.recentBidBottom}>
-        <Text style={styles.recentBidAmount}>{item.amount}</Text>
-        <View style={[styles.bidTag, pre && styles.bidTagPre]}>
-          <Text style={[styles.bidTagLabel, pre && styles.bidTagLabelPre]}>{item.tag}</Text>
+      {/* Avatar beside a content column, the same shape as a comment, so the
+          amount lines up under the name rather than under the avatar. */}
+      <Avatar initials={item.initials} size={AVATAR} />
+      <View style={styles.recentBidContent}>
+        <View style={styles.recentBidTop}>
+          <Text style={styles.bidName} numberOfLines={1}>
+            {item.name}
+          </Text>
+          {item.verified ? <Icon name="Verified" size={14} color={VERIFIED} /> : null}
+          <Text style={styles.bidTime}>{item.time}</Text>
+        </View>
+        <View style={styles.recentBidBottom}>
+          <Text style={styles.recentBidAmount}>{item.amount}</Text>
+          <View style={[styles.bidTag, pre && styles.bidTagPre]}>
+            <Text style={[styles.bidTagLabel, pre && styles.bidTagLabelPre]}>{item.tag}</Text>
+          </View>
         </View>
       </View>
     </View>
@@ -163,13 +167,13 @@ function CommentBlock({ item, nested, onReply }) {
  * the send button only appears once there is something to send, so the resting
  * state stays the quiet placeholder the comp shows.
  */
-function CommentComposer({ value, onChange, onSend, autoFocus, onFocus }) {
+function CommentComposer({ value, onChange, onSend, autoFocus, onFocus, label = 'Add a comment' }) {
   return (
     <View style={styles.composer}>
       <Avatar initials="IT" size={34} />
       <View style={styles.field}>
         <View style={styles.fieldText}>
-          {value ? <Text style={styles.fieldLabel}>Add a comment</Text> : null}
+          {value ? <Text style={styles.fieldLabel}>{label}</Text> : null}
           <TextInput
             style={styles.input}
             value={value}
@@ -210,19 +214,53 @@ export default function AuctionActivitySheet({ visible, onClose, activity, prima
   useEffect(() => {
     if (visible) setTab(TABS[initialTab]?.key ?? 'recent');
   }, [visible, initialTab]);
-  const feed = activity?.feed ?? [];
+  // The feed is held locally so a comment or reply posted here appears in the
+  // thread and in the counts, rather than the composer clearing to nothing.
+  const [feed, setFeed] = useState(activity?.feed ?? []);
+  useEffect(() => {
+    setFeed(activity?.feed ?? []);
+  }, [activity]);
   // The composer takes over the footer while a comment is being written; the
   // Comment tab shows it at rest too.
   const [composing, setComposing] = useState(false);
   const [draft, setDraft] = useState('');
+  // Which comment the draft is answering, if any.
+  const [replyTarget, setReplyTarget] = useState(null);
+
+  /** Appends `reply` under the comment with `id`, at whatever depth it sits. */
+  const addReply = (items, id, reply) =>
+    items.map((item) => {
+      if (item.id === id) return { ...item, replies: [...(item.replies ?? []), reply] };
+      if (item.replies?.length) {
+        return { ...item, replies: addReply(item.replies, id, reply) };
+      }
+      return item;
+    });
+
   const send = () => {
+    const text = draft.trim();
+    if (!text) return;
+    const posted = {
+      id: `local-${feed.length}-${text.length}-${replyTarget?.id ?? 'root'}`,
+      type: 'comment',
+      initials: 'IT',
+      name: 'You',
+      time: 'Just now',
+      verified: false,
+      text,
+    };
+    setFeed((prev) =>
+      replyTarget ? addReply(prev, replyTarget.id, posted) : [posted, ...prev]
+    );
     setDraft('');
+    setReplyTarget(null);
     setComposing(false);
   };
-  // Replying opens the composer focused. The name is seeded into the draft so
-  // it is clear which comment is being answered — the thread itself is not
-  // wired yet, so this is the honest half of it rather than a silent no-op.
+
+  // Replying opens the composer focused and remembers who is being answered,
+  // so sending files it under that comment rather than as a new thread.
   const replyTo = (item) => {
+    setReplyTarget(item);
     setDraft((prev) => (prev ? prev : `@${item.name} `));
     setComposing(true);
   };
@@ -230,6 +268,7 @@ export default function AuctionActivitySheet({ visible, onClose, activity, prima
     if (!visible) {
       setComposing(false);
       setDraft('');
+      setReplyTarget(null);
     }
   }, [visible]);
   // Changing tab leaves the composer, so Recent and Bid history go back to
@@ -291,6 +330,7 @@ export default function AuctionActivitySheet({ visible, onClose, activity, prima
               onSend={send}
               autoFocus={composing}
               onFocus={() => setComposing(true)}
+              label={replyTarget ? `Replying to ${replyTarget.name}` : 'Add a comment'}
             />
           ) : (
             <>
@@ -360,13 +400,15 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: color.background.neutralMuted,
   },
-  bidName: { ...font.subheadlineEmphasized, color: LABEL_PRIMARY, flexShrink: 1 },
+  bidName: { ...font.footnoteEmphasized, color: LABEL_PRIMARY, flexShrink: 1 },
   recentBid: {
+    flexDirection: 'row',
+    gap: spacing[2],
     backgroundColor: color.background.brandPrimarySubtle,
     borderRadius: radius.lg,
     padding: spacing[3],
-    gap: spacing[1],
   },
+  recentBidContent: { flex: 1, gap: spacing[1] },
   recentBidTop: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   recentBidBottom: { flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
   recentBidAmount: { ...font.calloutEmphasized, color: LABEL_PRIMARY },
@@ -394,7 +436,7 @@ const styles = StyleSheet.create({
     // turning in under its avatar.
     left: -(AVATAR / 2 + spacing[2]),
     top: -spacing[5],
-    width: AVATAR / 2 + spacing[1],
+    width: AVATAR / 2 + spacing[2],
     height: spacing[5] + AVATAR / 2,
     borderLeftWidth: 1,
     borderBottomWidth: 1,

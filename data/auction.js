@@ -11,27 +11,20 @@ export const auction = {
   photoCount: 34,
   videoCount: 1,
   saveCount: 42,
-  countdown: '2d : 2h : 34m',
+  countdown: '20h 34m 21s',
   reserveStatus: 'Reserve nearly met',
   stats: [
     { icon: 'Gavel', label: '13 Bids' },
     { icon: 'Comment', label: '6 Comments' },
     { icon: 'Eye', label: '320 watching' },
   ],
-  latestActivity: {
-    heading: 'Live auction activities',
-    bidderInitials: 'UN',
-    bidder: 'RickyBobby',
-    tag: 'Bid',
-    amount: '£32,000',
-  },
   /**
    * The "Live auction activities" widget swipes across three compact pages —
    * Recent, Bid history and Comments — and opens the full activity sheet on tap.
    */
   activity: {
     pages: [
-      { key: 'recent', heading: 'Live auction activities', type: 'bid', initials: 'UN', name: 'RickyBobby', tag: 'Bid', amount: '£32,000' },
+      { key: 'recent', heading: 'Live auction activities', type: 'bid', initials: 'RB', name: 'Ricky••••', tag: 'Bid', amount: '£32,000' },
       { key: 'bids', heading: 'Bid history', type: 'bid', initials: 'UN', name: 'User_Na••••', tag: 'Pre bid', amount: '£32,000' },
       { key: 'comments', heading: 'Comments', type: 'comment', initials: 'RB', text: 'I pity the fool who outbids me. I’m going to buy...' },
     ],
@@ -43,7 +36,7 @@ export const auction = {
       { id: 'c2', type: 'comment', initials: 'BA', name: 'BA_Baracus', time: '2 mins', verified: true, text: "Don't you put that evil on me, Ricky Bobby!", replies: [{ id: 'c2r1', initials: 'RB', name: 'RickyBobby', time: '10 mins', verified: true, text: 'Let’s see what you got!' }] },
       { id: 'c3', type: 'comment', initials: 'RB', name: 'RickyBobby', time: '10 mins', verified: true, text: 'This is a siccck whip, yo.' },
       { id: 'b3', type: 'bid', verified: true, initials: 'UN', name: 'User_Na••••', time: '12 mins', amount: '£31,000', tag: 'Pre bid' },
-      { id: 'b4', type: 'bid', verified: true, initials: 'RB', name: 'RickyBobby', time: '15 mins', amount: '£30,000', tag: 'Bid' },
+      { id: 'b4', type: 'bid', verified: true, initials: 'RB', name: 'Ricky••••', time: '15 mins', amount: '£30,000', tag: 'Bid' },
     ],
   },
   primaryAction: 'Place a bid',
