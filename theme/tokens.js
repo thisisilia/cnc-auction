@@ -31,6 +31,8 @@ export const color = {
     brandPrimaryRegular: '#14955d',
     // The "Bid" tag on the live-activities card.
     successBold: '#34a14f',
+    // hsla(0, 0%, 90%, 1) — the count badges on the activity sheet's tabs.
+    neutralMuted: '#e5e5e5',
     inverseBold: '#1e1f1e',
     // Not from Figma: fills the gutter beside the phone frame on web only.
     pageBackdrop: '#e8ebe8',

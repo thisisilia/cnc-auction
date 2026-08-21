@@ -7,6 +7,10 @@
  * so swiping right past the video walks the gallery. The counts stay put over
  * the pager rather than riding with it, matching the comp.
  *
+ * The indicator shows at most three dots: with a photo per page a full set
+ * would be a smear, so it slides a three-dot window along the run and the
+ * numeric counter beside it carries the exact position.
+ *
  * Figma pairs the pill fills with a 50px background blur. React Native has no
  * portable backdrop filter, so `color.overlay.neutralBold` carries a little
  * extra alpha instead to keep the white glyphs legible over a bright photo.
@@ -28,6 +32,8 @@ import { color, font, layout, radius, spacing } from '../../theme/tokens';
 
 const HERO_HEIGHT = 295;
 const PILL = 34;
+/** Most dots the indicator ever shows, however many pages there are. */
+const DOTS = 3;
 
 function ChromeButton({ glyph, glyphColor, label, count, onPress }) {
   return (
@@ -85,10 +91,33 @@ export default function Hero({
   const { width: windowWidth } = useWindowDimensions();
   const [measured, setMeasured] = useState(0);
   const width = measured || Math.min(windowWidth, layout.frameWidth);
+  const [page, setPage] = useState(0);
+
+  const current = media[page];
+  const photoCount = media.filter((m) => m.type === 'photo').length;
+
+  // A three-dot window that only slides once the run reaches its ends, so the
+  // active dot sits centre except at the very start and finish.
+  const dotCount = Math.min(DOTS, media.length);
+  const first = Math.max(0, Math.min(page - Math.floor(dotCount / 2), media.length - dotCount));
+  const dotWindow = Array.from({ length: dotCount }, (_, i) => first + i);
 
   return (
     <View style={styles.root} onLayout={(e) => setMeasured(e.nativeEvent.layout.width)}>
-      <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false}>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        // Tracked on every frame rather than on momentum end alone: a trackpad
+        // swipe or a programmatic scroll on web never fires a momentum event,
+        // which would leave the indicator stuck on the page it started from.
+        scrollEventThrottle={16}
+        onScroll={(e) => {
+          if (!width) return;
+          const next = Math.round(e.nativeEvent.contentOffset.x / width);
+          setPage((prev) => (prev === next ? prev : next));
+        }}
+      >
         {media.map((item) => (
           <View key={item.key} style={[styles.page, { width }]}>
             <Image
@@ -130,20 +159,33 @@ export default function Hero({
       </View>
 
       <View style={styles.counts} pointerEvents="box-none">
-        <CountPill
-          glyph="HeroImages"
-          count={auction.photoCount}
-          label={`View all ${auction.photoCount} photos`}
-          onPress={onOpenPhotos}
-        />
-        <CountPill
-          glyph="HeroVideos"
-          count={auction.videoCount}
-          label={`View ${auction.videoCount} video`}
-          onPress={onOpenVideos}
-        />
+        <View style={styles.countsLeft}>
+          <CountPill
+            glyph="HeroImages"
+            count={auction.photoCount}
+            label={`View all ${auction.photoCount} photos`}
+            onPress={onOpenPhotos}
+          />
+          <CountPill
+            glyph="HeroVideos"
+            count={auction.videoCount}
+            label={`View ${auction.videoCount} video`}
+            onPress={onOpenVideos}
+          />
+        </View>
+
+        {current?.type === 'photo' ? (
+          <View style={styles.counter}>
+            <Text style={styles.counterText}>{`${current.index} / ${photoCount}`}</Text>
+          </View>
+        ) : null}
       </View>
 
+      <View style={styles.dots} pointerEvents="none">
+        {dotWindow.map((index) => (
+          <View key={index} style={[styles.dot, index === page && styles.dotActive]} />
+        ))}
+      </View>
     </View>
   );
 }
@@ -204,7 +246,25 @@ const styles = StyleSheet.create({
     left: spacing[4],
     right: spacing[4],
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  // Both badges sit together on the left; the counter takes the right.
+  countsLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  counter: {
+    height: 29,
+    justifyContent: 'center',
+    paddingHorizontal: spacing[2],
+    borderRadius: radius.md,
+    backgroundColor: color.overlay.neutralBold,
+  },
+  counterText: {
+    ...font.caption2Emphasized,
+    color: color.text.inverseBold,
   },
   countPill: {
     height: 29,

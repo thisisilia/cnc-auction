@@ -34,7 +34,7 @@ function TabButton({ tab, count, active, onPress }) {
   return (
     <Pressable style={styles.tab} onPress={onPress} accessibilityRole="tab" accessibilityState={{ selected: active }}>
       <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>{tab.label}</Text>
-      <View style={[styles.tabBadge, active && styles.tabBadgeActive]}>
+      <View style={styles.tabBadge}>
         <Text style={styles.tabBadgeLabel}>{count}</Text>
       </View>
       {active ? <View style={styles.tabUnderline} /> : null}
@@ -157,10 +157,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: color.background.neutralRegular,
+    backgroundColor: color.background.neutralMuted,
   },
-  tabBadgeActive: { backgroundColor: color.background.inverseBold },
-  tabBadgeLabel: { ...font.caption2Emphasized, color: color.text.inverseBold },
+  tabBadgeLabel: { ...font.footnoteEmphasized, color: LABEL_PRIMARY },
   tabUnderline: { position: 'absolute', left: 0, right: 0, bottom: -1, height: 2, borderRadius: 2, backgroundColor: color.background.inverseBold },
   feed: { flex: 1 },
   feedContent: { paddingHorizontal: spacing[4], paddingVertical: spacing[3], gap: spacing[4] },

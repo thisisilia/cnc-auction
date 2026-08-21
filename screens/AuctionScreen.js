@@ -57,11 +57,21 @@ const HERO_HEIGHT = 295;
  * swiping on past the video walks the gallery. One committed image stands in
  * for every frame until a real listing supplies its own URLs.
  */
+const HERO_PHOTO = require('../assets/figma/hero.jpg');
+
+/**
+ * The walkaround video first, then one page per listing photo, so the counter
+ * over the carousel ("3 of 34") matches the photo count on the badge. Every
+ * page points at the one committed image until a listing supplies its own.
+ */
 const HERO_MEDIA = [
-  { key: 'video', type: 'video', source: require('../assets/figma/hero.jpg') },
-  { key: 'photo-1', type: 'photo', source: require('../assets/figma/hero.jpg') },
-  { key: 'photo-2', type: 'photo', source: require('../assets/figma/thumb.jpg') },
-  { key: 'photo-3', type: 'photo', source: require('../assets/figma/hero.jpg') },
+  { key: 'video', type: 'video', source: HERO_PHOTO },
+  ...Array.from({ length: auction.photoCount }, (_, i) => ({
+    key: `photo-${i + 1}`,
+    type: 'photo',
+    index: i + 1,
+    source: HERO_PHOTO,
+  })),
 ];
 
 const TABS = [
@@ -100,6 +110,11 @@ export default function AuctionScreen() {
   // Y of the in-page "Place a bid", which is what arms the sticky bar.
   const bidY = useRef(0);
   const pageY = (key) => anchors.current[key] + bodyY.current;
+
+  // Suppresses the scroll-derived active tab while a tab tap scrolls the page.
+  const tabLock = useRef(false);
+  const tabLockTimer = useRef(null);
+  useEffect(() => () => clearTimeout(tabLockTimer.current), []);
 
   const [barActive, setBarActive] = useState(false);
   const [barHeight, setBarHeight] = useState(120);
@@ -159,7 +174,7 @@ export default function AuctionScreen() {
         (key) => anchors.current[key] > 0 && probe >= pageY(key)
       );
       const next = atBottom ? TABS[TABS.length - 1].key : (current ?? 'overview');
-      setActiveTab((prev) => (prev === next ? prev : next));
+      if (!tabLock.current) setActiveTab((prev) => (prev === next ? prev : next));
 
       // The sticky bar arms once the in-page bid button is gone, then hides on
       // a sustained scroll down and returns on any scroll up. The accumulator
@@ -215,6 +230,15 @@ export default function AuctionScreen() {
 
   const goToTab = (key) => {
     setActiveTab(key);
+    // Hold the tap's choice while the animated scroll runs. Without this the
+    // scroll listener recomputes the active tab on every frame of the way, so
+    // the underline skips through the tabs it passes before settling — which
+    // is the flicker on tapping Overview, the longest journey of the four.
+    tabLock.current = true;
+    clearTimeout(tabLockTimer.current);
+    tabLockTimer.current = setTimeout(() => {
+      tabLock.current = false;
+    }, 650);
     const target = key === 'overview' ? 0 : Math.max(pageY(key) - headerHeight, 0);
     scrollRef.current?.scrollTo({ y: target, animated: true });
   };
