@@ -20,7 +20,7 @@ function SpecRow({ spec }) {
         {spec.badge ? (
           <Image
             source={BADGES[spec.badge]}
-            style={styles.badge}
+            style={[styles.badge, spec.badge === 'flag' && styles.badgeFlag]}
             resizeMode="contain"
             accessibilityIgnoresInvertColors
           />
@@ -71,6 +71,14 @@ const styles = StyleSheet.create({
   badge: {
     width: size[6],
     height: size[6],
+  },
+  // The flag is a solid disc that fills its box edge to edge, where the vector
+  // glyphs beside it are line art inset inside the designer's 24pt viewBox
+  // (their drawing spans about 18). Matching the box made the flag read a size
+  // larger than the column, so it is sized to the artwork instead.
+  badgeFlag: {
+    width: 20,
+    height: 20,
   },
   label: {
     ...font.subheadlineRegular,

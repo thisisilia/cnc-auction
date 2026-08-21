@@ -224,11 +224,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[2],
     paddingVertical: spacing.xxs,
     borderRadius: radius.sm,
-    backgroundColor: color.background.neutralRegular,
+    backgroundColor: color.background.successBold,
   },
   tagText: {
     ...font.caption2Emphasized,
-    color: color.text.labelPrimary,
+    // #333 on the green fill is unreadable; the label goes inverse with it.
+    color: color.text.inverseBold,
   },
   amount: {
     ...font.calloutEmphasized,
