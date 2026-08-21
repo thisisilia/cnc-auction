@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { USE_NATIVE_DRIVER } from '../theme/animation';
 import { color, spacing } from '../theme/tokens';
 
 /** Sheets never grow taller than this, even on large screens. */
@@ -73,14 +74,14 @@ export default function BottomSheet({
         toValue: 1,
         duration: 260,
         easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
+        useNativeDriver: USE_NATIVE_DRIVER,
       }).start();
     } else {
       Animated.timing(progress, {
         toValue: 0,
         duration: 200,
         easing: Easing.in(Easing.cubic),
-        useNativeDriver: true,
+        useNativeDriver: USE_NATIVE_DRIVER,
       }).start(({ finished }) => {
         if (finished) setMounted(false);
       });
@@ -129,11 +130,11 @@ export default function BottomSheet({
             onClose();
             drag.setValue(0);
           } else {
-            Animated.spring(drag, { toValue: 0, useNativeDriver: true, bounciness: 0 }).start();
+            Animated.spring(drag, { toValue: 0, useNativeDriver: USE_NATIVE_DRIVER, bounciness: 0 }).start();
           }
         },
         onPanResponderTerminate: () => {
-          Animated.spring(drag, { toValue: 0, useNativeDriver: true, bounciness: 0 }).start();
+          Animated.spring(drag, { toValue: 0, useNativeDriver: USE_NATIVE_DRIVER, bounciness: 0 }).start();
         },
       }),
     [drag, onClose]

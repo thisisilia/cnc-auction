@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card } from '../ui';
+import { USE_NATIVE_DRIVER } from '../../theme/animation';
 import { color, font, radius, spacing } from '../../theme/tokens';
 
 function Avatar({ initials }) {
@@ -61,9 +62,9 @@ export default function ActivityCard({ activity, onOpen }) {
       const next = Math.max(0, Math.min(pages.length - 1, indexRef.current + dir));
       if (next === indexRef.current) return;
       animating.current = true;
-      Animated.timing(opacity, { toValue: 0, duration: 120, useNativeDriver: true }).start(() => {
+      Animated.timing(opacity, { toValue: 0, duration: 120, useNativeDriver: USE_NATIVE_DRIVER }).start(() => {
         setIndex(next);
-        Animated.timing(opacity, { toValue: 1, duration: 150, useNativeDriver: true }).start(() => {
+        Animated.timing(opacity, { toValue: 1, duration: 150, useNativeDriver: USE_NATIVE_DRIVER }).start(() => {
           animating.current = false;
         });
       });

@@ -39,12 +39,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing[2],
   },
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: radius.full,
-    backgroundColor: color.systemBlue,
-  },
   countdownLabel: {
     ...font.subheadlineEmphasized,
     color: color.text.labelPrimary,

@@ -12,9 +12,10 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { Animated, Easing, Platform, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 import { Button } from '../ui';
 import { useCountdown } from './useCountdown';
+import { USE_NATIVE_DRIVER } from '../../theme/animation';
 import { color, font, radius, spacing } from '../../theme/tokens';
 
 /**
@@ -43,10 +44,7 @@ function Ring({ size, dotColor, index }) {
         toValue: 1,
         duration: RING_DURATION,
         easing: Easing.linear,
-        // react-native-web has no native driver; asking for one here leaves the
-        // loop parked on its end frame instead of restarting, so the rings
-        // freeze fully expanded. Drive it in JS on web, natively on device.
-        useNativeDriver: Platform.OS !== 'web',
+        useNativeDriver: USE_NATIVE_DRIVER,
       }),
       { resetBeforeIteration: true }
     );

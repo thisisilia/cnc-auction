@@ -45,6 +45,7 @@ import { useSmoothScroll } from '../components/useSmoothScroll';
 import TimeBar from '../components/auction/TimeBar';
 import { Button } from '../components/ui';
 import { auction } from '../data/auction';
+import { USE_NATIVE_DRIVER } from '../theme/animation';
 import { color, layout, spacing } from '../theme/tokens';
 
 const HERO_HEIGHT = 295;
@@ -167,7 +168,7 @@ export default function AuctionScreen() {
   const [headerShown, setHeaderShown] = useState(false);
 
   const onScroll = Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
-    useNativeDriver: true,
+    useNativeDriver: USE_NATIVE_DRIVER,
     listener: (e) => {
       const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
       const y = contentOffset.y;
@@ -226,7 +227,7 @@ export default function AuctionScreen() {
       toValue: barActive ? 1 : 0,
       duration: 240,
       easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
+      useNativeDriver: USE_NATIVE_DRIVER,
     }).start();
   }, [barActive, bar]);
 
