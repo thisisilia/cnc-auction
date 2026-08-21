@@ -50,8 +50,12 @@ function TabButton({ tab, count, active, onPress }) {
  * amount takes the middle and the time sits right, so a column of them lines
  * the amounts up against each other.
  */
+function isPreBid(tag) {
+  return /pre/i.test(tag ?? '');
+}
+
 function BidRow({ item }) {
-  const pre = /pre/i.test(item.tag ?? '');
+  const pre = isPreBid(item.tag);
   return (
     <View style={styles.bidRow}>
       <Avatar initials={item.initials} />
@@ -63,6 +67,36 @@ function BidRow({ item }) {
       </View>
       <Text style={styles.bidAmount}>{item.amount}</Text>
       <Text style={styles.bidTime}>{item.time}</Text>
+    </View>
+  );
+}
+
+/**
+ * A bid as the Recent tab shows it — Figma 2:6799. Two lines on a brand tint:
+ * bidder, verification and time above; amount and tag below. Bid history keeps
+ * the denser single-line rows, since a column of them is read by comparing
+ * amounts rather than by scanning events.
+ */
+function RecentBid({ item }) {
+  const pre = isPreBid(item.tag);
+  return (
+    <View style={styles.recentBid}>
+      <View style={styles.recentBidTop}>
+        <Avatar initials={item.initials} />
+        <Text style={styles.bidName} numberOfLines={1}>
+          {item.name}
+        </Text>
+        {item.verified ? (
+          <Icon name="CircleCheck" size={18} color={color.background.successBold} />
+        ) : null}
+        <Text style={styles.bidTime}>{item.time}</Text>
+      </View>
+      <View style={styles.recentBidBottom}>
+        <Text style={styles.recentBidAmount}>{item.amount}</Text>
+        <View style={[styles.bidTag, pre && styles.bidTagPre]}>
+          <Text style={[styles.bidTagLabel, pre && styles.bidTagLabelPre]}>{item.tag}</Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -107,22 +141,6 @@ function CommentBlock({ item, nested }) {
 }
 
 /**
- * Collapses consecutive same-type entries into groups, so a run of bids can
- * share a card while comments stay one block each.
- */
-function groupRuns(items) {
-  return items.reduce((groups, item) => {
-    const last = groups[groups.length - 1];
-    if (item.type === 'bid' && last?.type === 'bid') {
-      last.items.push(item);
-      return groups;
-    }
-    groups.push({ type: item.type, key: item.id, items: [item] });
-    return groups;
-  }, []);
-}
-
-/**
  * Comment composer — Figma 387:3138. Avatar, a rounded field and the paperclip;
  * the send button only appears once there is something to send, so the resting
  * state stays the quiet placeholder the comp shows.
@@ -148,12 +166,17 @@ function CommentComposer({ value, onChange, onSend, autoFocus, onFocus }) {
         <Pressable accessibilityRole="button" accessibilityLabel="Attach a photo" style={styles.attach}>
           <Icon name="Attach" size={24} color={color.text.labelPrimary} />
         </Pressable>
+        {value.trim() ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Send comment"
+            onPress={onSend}
+            style={styles.send}
+          >
+            <SendButton size={30} />
+          </Pressable>
+        ) : null}
       </View>
-      {value.trim() ? (
-        <Pressable accessibilityRole="button" accessibilityLabel="Send comment" onPress={onSend}>
-          <SendButton size={34} />
-        </Pressable>
-      ) : null}
     </View>
   );
 }
@@ -214,14 +237,11 @@ export default function AuctionActivitySheet({ visible, onClose, activity, prima
           {tab === 'bids' ? (
             <BidHistory items={items} />
           ) : (
-            // Recent interleaves both, so runs of bids share one card the way
-            // the Bid history tab does — a card per bid would break the rhythm
-            // and read as four separate events rather than a run of bidding.
-            groupRuns(items).map((group) =>
-              group.type === 'bid' ? (
-                <BidHistory key={group.key} items={group.items} />
+            items.map((item) =>
+              item.type === 'bid' ? (
+                <RecentBid key={item.id} item={item} />
               ) : (
-                <CommentBlock key={group.key} item={group.items[0]} />
+                <CommentBlock key={item.id} item={item} />
               )
             )
           )}
@@ -313,6 +333,15 @@ const styles = StyleSheet.create({
     backgroundColor: color.background.neutralMuted,
   },
   bidName: { ...font.subheadlineEmphasized, color: LABEL_PRIMARY, flexShrink: 1 },
+  recentBid: {
+    backgroundColor: color.background.brandPrimarySubtle,
+    borderRadius: radius.lg,
+    padding: spacing[3],
+    gap: spacing[1],
+  },
+  recentBidTop: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  recentBidBottom: { flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
+  recentBidAmount: { ...font.title2Emphasized, color: LABEL_PRIMARY },
   // The amount takes the slack so a column of rows aligns on it.
   bidAmount: { ...font.calloutEmphasized, color: LABEL_PRIMARY, flex: 1, textAlign: 'right' },
   bidTime: { ...font.bodyXsRegular, color: color.text.neutralRegular, minWidth: 52, textAlign: 'right' },
@@ -338,11 +367,13 @@ const styles = StyleSheet.create({
   composer: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
   field: {
     flex: 1,
-    height: 44,
+    // Grows a little to seat the send button without cramping it.
+    minHeight: 44,
     flexDirection: 'row',
     alignItems: 'center',
     paddingLeft: spacing[4],
-    paddingRight: spacing[2],
+    paddingRight: spacing[1.5],
+    paddingVertical: spacing[1],
     borderRadius: radius.full,
     backgroundColor: color.background.neutralWhite,
   },
@@ -353,5 +384,6 @@ const styles = StyleSheet.create({
     // Strips the focus ring react-native-web puts on a web input.
     outlineStyle: 'none',
   },
-  attach: { paddingLeft: spacing[2] },
+  attach: { paddingHorizontal: spacing[2] },
+  send: { marginLeft: spacing[1] },
 });

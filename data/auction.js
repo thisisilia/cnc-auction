@@ -38,13 +38,13 @@ export const auction = {
     counts: { recent: 8, bids: 4, comments: 4 },
     // Interleaved feed for the sheet's Recent tab; split by type for the others.
     feed: [
-      { id: 'b1', type: 'bid', initials: 'RB', name: 'Rick••••', time: 'Just now', amount: '£40,000', tag: 'Bid' },
+      { id: 'b1', type: 'bid', verified: true, initials: 'RB', name: 'Rick••••', time: 'Just now', amount: '£40,000', tag: 'Bid' },
       { id: 'c1', type: 'comment', initials: 'BA', name: 'BA_Baracus', time: '2 mins', verified: true, text: "I pity the fool who outbids me. I'm going to buy this sucker, paint it black with a red stripe, then add some guns and maybe a rocket launcher." },
-      { id: 'b2', type: 'bid', initials: 'TW', name: 'Tom••••', time: '5 mins', amount: '£34,250', tag: 'Bid' },
+      { id: 'b2', type: 'bid', verified: true, initials: 'TW', name: 'Tom••••', time: '5 mins', amount: '£34,250', tag: 'Bid' },
       { id: 'c2', type: 'comment', initials: 'BA', name: 'BA_Baracus', time: '2 mins', verified: true, text: "Don't you put that evil on me, Ricky Bobby!", replies: [{ id: 'c2r1', initials: 'RB', name: 'RickyBobby', time: '10 mins', verified: true, text: 'Let’s see what you got!' }] },
       { id: 'c3', type: 'comment', initials: 'RB', name: 'RickyBobby', time: '10 mins', verified: true, text: 'This is a siccck whip, yo.' },
-      { id: 'b3', type: 'bid', initials: 'UN', name: 'User_Na••••', time: '12 mins', amount: '£31,000', tag: 'Pre bid' },
-      { id: 'b4', type: 'bid', initials: 'RB', name: 'RickyBobby', time: '15 mins', amount: '£30,000', tag: 'Bid' },
+      { id: 'b3', type: 'bid', verified: true, initials: 'UN', name: 'User_Na••••', time: '12 mins', amount: '£31,000', tag: 'Pre bid' },
+      { id: 'b4', type: 'bid', verified: true, initials: 'RB', name: 'RickyBobby', time: '15 mins', amount: '£30,000', tag: 'Bid' },
     ],
   },
   primaryAction: 'Place a bid',

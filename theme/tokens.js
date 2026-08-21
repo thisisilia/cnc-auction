@@ -32,6 +32,8 @@ export const color = {
     neutralSubtle: '#f7f9f7',
     neutralRegular: '#eff1ef',
     brandPrimaryRegular: '#14955d',
+    // The Recent tab's bid cards sit on this tint (Figma 2:6799).
+    brandPrimarySubtle: '#ecfff4',
     // The "Bid" tag on the live-activities card.
     successBold: '#34a14f',
     // hsla(0, 0%, 90%, 1) — the count badges on the activity sheet's tabs.
