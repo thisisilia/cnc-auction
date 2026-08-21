@@ -16,11 +16,11 @@
     "react-native-web": "^0.21.2"
   },
   "scripts": {
-    "start": "expo start",
+    "start": "expo start --port 8090",
     "dev": "expo start --web --port 8090",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "android": "expo start --android --port 8090",
+    "ios": "expo start --ios --port 8090",
+    "web": "expo start --web --port 8090"
   },
   "private": true
 }

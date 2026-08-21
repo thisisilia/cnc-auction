@@ -6,9 +6,11 @@ The Car & Classic auction detail page, built from Figma
 
 Expo SDK 57 / React Native 0.86, running on iOS, Android and web.
 
+All scripts run on port **8090**.
+
 ```
 npm run dev     # web on http://localhost:8090
-npm run web     # web on Expo's default http://localhost:8081
+npm run web     # web on http://localhost:8090
 npm run ios
 npm run android
 ```
