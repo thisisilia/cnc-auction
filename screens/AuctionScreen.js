@@ -238,7 +238,7 @@ export default function AuctionScreen() {
         // FAQ cards clear it without a slab of empty page below them. The bar
         // already carries the safe-area inset in its own height, so adding
         // insets.bottom here would count it twice.
-        contentContainerStyle={{ paddingBottom: barHeight + spacing[4] }}
+        contentContainerStyle={{ paddingBottom: barHeight + spacing[2] }}
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={16}
         onScroll={onScroll}
