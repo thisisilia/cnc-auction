@@ -193,7 +193,16 @@ export default function AuctionScreen() {
 
   const barTranslate = bar.interpolate({
     inputRange: [0, 1],
-    outputRange: [barHeight + 24, 0],
+    // Generous clearance: on a device the safe-area inset makes the bar taller
+    // than the height onLayout last reported, and a translate sized to that
+    // stale value leaves a sliver of the bar showing above the fold.
+    outputRange: [barHeight + 96, 0],
+  });
+  // Opacity settles it regardless of what the height measured: even if the
+  // translate falls short, a hidden bar is not painted and cannot be tapped.
+  const barOpacity = bar.interpolate({
+    inputRange: [0, 0.05, 1],
+    outputRange: [0, 1, 1],
   });
 
   const goToTab = (key) => {
@@ -311,6 +320,8 @@ export default function AuctionScreen() {
       <StickyBar
         auction={auction}
         translateY={barTranslate}
+        opacity={barOpacity}
+        pointerEvents={barActive ? 'auto' : 'none'}
         bottomInset={insets.bottom}
         reduceMotion={reduceMotion}
         onLayout={(e) => setBarHeight(e.nativeEvent.layout.height)}

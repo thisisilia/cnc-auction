@@ -101,6 +101,8 @@ export function PulsingDot({ size = 12, dotColor = color.systemRed, reduceMotion
 export default function StickyBar({
   auction,
   translateY,
+  opacity,
+  pointerEvents = 'auto',
   bottomInset = 0,
   onLayout,
   onRequestViewing,
@@ -111,7 +113,15 @@ export default function StickyBar({
   return (
     <Animated.View
       onLayout={onLayout}
-      style={[styles.root, { transform: [{ translateY }], paddingBottom: Math.max(bottomInset, spacing[8]) }]}
+      pointerEvents={pointerEvents}
+      style={[
+        styles.root,
+        {
+          transform: [{ translateY }],
+          opacity,
+          paddingBottom: Math.max(bottomInset, spacing[8]),
+        },
+      ]}
     >
       <View style={styles.countdownRow}>
         <View style={styles.countdown}>
