@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     backgroundColor: color.background.neutralRegular,
   },
   contactLabel: {
-    ...font.bodySmRegular,
+    ...font.footnoteEmphasized,
     color: color.text.labelPrimary,
   },
   viewingButton: {
