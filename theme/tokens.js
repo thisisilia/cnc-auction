@@ -55,8 +55,10 @@ export const color = {
   },
   // iOS "Colors/Blue" — the live-countdown dot.
   systemBlue: '#007aff',
-  // iOS "Colors/Red" — the saved-heart fill and the sticky bar's urgency dot.
+  // iOS "Colors/Red" — the saved-heart fill.
   systemRed: '#ff2d55',
+  // The live-countdown pulse.
+  pulseRed: '#b91c1c',
 };
 
 /** Frame width of the Figma artboard (iPhone 14/15 Pro). */

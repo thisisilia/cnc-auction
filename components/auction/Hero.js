@@ -159,26 +159,27 @@ export default function Hero({
       </View>
 
       <View style={styles.counts} pointerEvents="box-none">
-        <View style={styles.countsLeft}>
+        <CountPill
+          glyph="HeroVideos"
+          count={auction.videoCount}
+          label={`View ${auction.videoCount} video`}
+          onPress={onOpenVideos}
+        />
+
+        {/* Both photo-related controls sit together on the right. */}
+        <View style={styles.countsRight}>
+          {current?.type === 'photo' ? (
+            <View style={styles.counter}>
+              <Text style={styles.counterText}>{`${current.index} / ${photoCount}`}</Text>
+            </View>
+          ) : null}
           <CountPill
             glyph="HeroImages"
             count={auction.photoCount}
             label={`View all ${auction.photoCount} photos`}
             onPress={onOpenPhotos}
           />
-          <CountPill
-            glyph="HeroVideos"
-            count={auction.videoCount}
-            label={`View ${auction.videoCount} video`}
-            onPress={onOpenVideos}
-          />
         </View>
-
-        {current?.type === 'photo' ? (
-          <View style={styles.counter}>
-            <Text style={styles.counterText}>{`${current.index} / ${photoCount}`}</Text>
-          </View>
-        ) : null}
       </View>
 
       <View style={styles.dots} pointerEvents="none">
@@ -249,8 +250,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  // Both badges sit together on the left; the counter takes the right.
-  countsLeft: {
+  countsRight: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],

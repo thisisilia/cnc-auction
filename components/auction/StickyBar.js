@@ -78,7 +78,7 @@ function Ring({ size, dotColor, index }) {
  * `reduceMotion` leaves the plain dot in place for anyone who has asked the OS
  * for less animation.
  */
-export function PulsingDot({ size = 12, dotColor = color.systemRed, reduceMotion = false }) {
+export function PulsingDot({ size = 10, dotColor = color.pulseRed, reduceMotion = false }) {
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
       {reduceMotion
@@ -128,7 +128,7 @@ export default function StickyBar({
     >
       <View style={styles.countdownRow}>
         <View style={styles.countdown}>
-          <PulsingDot dotColor={color.systemRed} reduceMotion={reduceMotion} />
+          <PulsingDot reduceMotion={reduceMotion} />
           <Text style={styles.countdownLabel}>{countdown}</Text>
         </View>
         <View style={styles.reserveChip}>

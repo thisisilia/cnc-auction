@@ -76,6 +76,18 @@ const HERO_MEDIA = [
   })),
 ];
 
+/**
+ * Every listing photo in one run, category after category — the fullscreen
+ * viewer pages through this rather than a single category's slice.
+ */
+const ALL_PHOTOS = auction.gallerySheet.categories.flatMap((category) =>
+  Array.from({ length: category.count }, (_, i) => ({
+    key: `${category.key}-${i}`,
+    title: category.label,
+    source: HERO_PHOTO,
+  }))
+);
+
 const TABS = [
   { key: 'overview', label: 'Overview' },
   { key: 'highlights', label: 'Highlights' },
@@ -377,12 +389,11 @@ export default function AuctionScreen() {
           setViewer({
             kind: 'photo',
             title: category.label,
-            index,
-            items: Array.from({ length: category.count }, (_, i) => ({
-              key: `${category.key}-${i}`,
-              title: category.label,
-              source: HERO_PHOTO,
-            })),
+            // Offset into the flattened run, so swiping past the last Interior
+            // photo continues into Engine rather than dead-ending. Each frame
+            // carries its own category, which is what retitles the header.
+            index: ALL_PHOTOS.findIndex((p) => p.key === `${category.key}-${index}`),
+            items: ALL_PHOTOS,
           })
         }
         onExpandVideo={() =>
