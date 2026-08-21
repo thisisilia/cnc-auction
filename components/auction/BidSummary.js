@@ -4,9 +4,19 @@
 
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon } from '../Icon';
+import { countBids, countComments } from './activityCounts';
 import { color, font, spacing } from '../../theme/tokens';
 
 export default function BidSummary({ auction }) {
+  // Stats carrying a `count` are read off the activity feed; the rest are copy.
+  const feed = auction.activity?.feed ?? [];
+  const totals = { bids: countBids(feed), comments: countComments(feed) };
+  const labelFor = (stat) => {
+    if (!stat.count) return stat.label;
+    const n = totals[stat.count];
+    return `${n} ${n === 1 ? stat.singular : stat.plural}`;
+  };
+
   return (
     <View>
       <Text style={styles.title}>{auction.title}</Text>
@@ -18,9 +28,9 @@ export default function BidSummary({ auction }) {
 
       <View style={styles.stats}>
         {auction.stats.map((stat) => (
-          <View key={stat.label} style={styles.stat}>
+          <View key={stat.icon} style={styles.stat}>
             <Icon name={stat.icon} size={18} color={color.icon.neutralRegular} />
-            <Text style={styles.statLabel}>{stat.label}</Text>
+            <Text style={styles.statLabel}>{labelFor(stat)}</Text>
           </View>
         ))}
       </View>

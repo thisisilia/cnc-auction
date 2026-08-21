@@ -60,6 +60,14 @@ export default function ActivityCard({ activity, onOpen }) {
   const bidCount = countBids(feed);
   const commentCount = countComments(feed);
   const bidders = countBidders(feed);
+  // Each page previews the newest entry it stands for, taken from the feed the
+  // sheet reads, so the two can never show different figures for the same bid.
+  const rowFor = (key) =>
+    key === 'bids'
+      ? feed.find((i) => i.type === 'bid')
+      : key === 'comments'
+      ? feed.find((i) => i.type === 'comment')
+      : feed[0];
   const subheadingFor = (key) => {
     if (key === 'bids') {
       return `${bidCount} ${bidCount === 1 ? 'Bid' : 'Bids'} from ${bidders} ${
@@ -157,6 +165,7 @@ export default function ActivityCard({ activity, onOpen }) {
   }, []);
 
   const page = pages[index];
+  const row = rowFor(page.key);
 
   return (
     <Card style={styles.root}>
@@ -181,7 +190,7 @@ export default function ActivityCard({ activity, onOpen }) {
           </View>
 
           <Animated.View style={[styles.content, { opacity }]}>
-            {page.type === 'bid' ? <BidRow item={page} /> : <CommentRow item={page} />}
+            {row ? row.type === 'bid' ? <BidRow item={row} /> : <CommentRow item={row} /> : null}
           </Animated.View>
         </Pressable>
       </View>

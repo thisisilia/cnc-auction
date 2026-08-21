@@ -9,7 +9,7 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet from '../BottomSheet';
 import SendButton from '../SendButton';
-import { countBids, countComments } from './activityCounts';
+import { countBids, countComments, countRecent } from './activityCounts';
 import { Icon } from '../Icon';
 import { color, font, radius, spacing } from '../../theme/tokens';
 
@@ -297,7 +297,7 @@ export default function AuctionActivitySheet({ visible, onClose, activity, prima
   }, [tab]);
 
   const counts = {
-    recent: feed.length,
+    recent: countRecent(feed),
     bids: countBids(feed),
     comments: countComments(feed),
   };

@@ -13,9 +13,12 @@ export const auction = {
   saveCount: 42,
   countdown: '20h 34m 21s',
   reserveStatus: 'Reserve nearly met',
+  // Bids and comments are counted off the feed below rather than written out,
+  // so the headline cannot claim a different number to the widget and the sheet
+  // further down the same page.
   stats: [
-    { icon: 'Gavel', label: '13 Bids' },
-    { icon: 'Comment', label: '6 Comments' },
+    { icon: 'Gavel', count: 'bids', singular: 'Bid', plural: 'Bids' },
+    { icon: 'Comment', count: 'comments', singular: 'Comment', plural: 'Comments' },
     { icon: 'Eye', label: '320 watching' },
   ],
   /**
@@ -23,17 +26,19 @@ export const auction = {
    * Recent, Bid history and Comments — and opens the full activity sheet on tap.
    */
   activity: {
+    // Headings only: each page previews the newest matching entry from the feed,
+    // so the widget cannot show a bid or a comment the sheet does not have.
     pages: [
-      { key: 'recent', heading: 'Live auction activities', type: 'bid', initials: 'RB', name: 'Ricky••••', tag: 'Bid', amount: '£32,000' },
-      { key: 'bids', heading: 'Bid history', type: 'bid', initials: 'UN', name: 'User_Na••••', tag: 'Pre bid', amount: '£32,000' },
-      { key: 'comments', heading: 'Comments', type: 'comment', initials: 'RB', text: 'I pity the fool who outbids me. I’m going to buy...' },
+      { key: 'recent', heading: 'Live auction activities' },
+      { key: 'bids', heading: 'Bid history' },
+      { key: 'comments', heading: 'Comments' },
     ],
     // Interleaved feed for the sheet's Recent tab; split by type for the others.
     feed: [
-      { id: 'b1', type: 'bid', verified: true, initials: 'RB', name: 'Rick••••', time: 'Just now', amount: '£40,000', tag: 'Bid' },
+      { id: 'b1', type: 'bid', verified: true, initials: 'RB', name: 'Ricky••••', time: 'Just now', amount: '£40,000', tag: 'Bid' },
       { id: 'c1', type: 'comment', initials: 'BA', name: 'BA_Baracus', time: '2 mins', verified: true, text: "I pity the fool who outbids me. I'm going to buy this sucker, paint it black with a red stripe, then add some guns and maybe a rocket launcher." },
       { id: 'b2', type: 'bid', verified: true, initials: 'TW', name: 'Tom••••', time: '5 mins', amount: '£34,250', tag: 'Bid' },
-      { id: 'c2', type: 'comment', initials: 'BA', name: 'BA_Baracus', time: '2 mins', verified: true, text: "Don't you put that evil on me, Ricky Bobby!", replies: [{ id: 'c2r1', initials: 'RB', name: 'RickyBobby', time: '10 mins', verified: true, text: 'Let’s see what you got!' }] },
+      { id: 'c2', type: 'comment', initials: 'BA', name: 'BA_Baracus', time: '8 mins', verified: true, text: "Don't you put that evil on me, Ricky Bobby!", replies: [{ id: 'c2r1', initials: 'RB', name: 'RickyBobby', time: '6 mins', verified: true, text: 'Let’s see what you got!' }] },
       { id: 'c3', type: 'comment', initials: 'RB', name: 'RickyBobby', time: '10 mins', verified: true, text: 'This is a siccck whip, yo.' },
       { id: 'b3', type: 'bid', verified: true, initials: 'UN', name: 'User_Na••••', time: '12 mins', amount: '£31,000', tag: 'Pre bid' },
       { id: 'b4', type: 'bid', verified: true, initials: 'RB', name: 'Ricky••••', time: '15 mins', amount: '£30,000', tag: 'Bid' },

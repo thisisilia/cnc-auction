@@ -13,6 +13,16 @@ export function countComments(feed = []) {
   return walk(feed.filter((item) => item.type === 'comment'));
 }
 
+/**
+ * Recent shows the bids and the comments interleaved, replies included — so its
+ * count is the two totals added, not the number of top-level feed rows. Counting
+ * rows both hid the replies already on screen and left the tally unchanged when
+ * a new reply was posted into a thread.
+ */
+export function countRecent(feed = []) {
+  return countBids(feed) + countComments(feed);
+}
+
 export function countBids(feed = []) {
   return feed.filter((item) => item.type === 'bid').length;
 }
