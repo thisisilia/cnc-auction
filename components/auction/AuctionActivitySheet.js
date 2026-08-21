@@ -14,7 +14,9 @@ import { color, font, radius, spacing } from '../../theme/tokens';
 
 const LABEL_PRIMARY = '#333';
 const LABEL_SECONDARY = 'rgba(60,60,67,0.6)';
-const BID_TINT = 'rgba(20,149,93,0.10)';
+// 2:6742 sets the bid card on the neutral subtle fill, not a brand tint — the
+// green belongs to the Bid tag alone.
+const BID_TINT = color.background.neutralSubtle;
 
 const TABS = [
   { key: 'recent', label: 'Recent' },
@@ -42,22 +44,38 @@ function TabButton({ tab, count, active, onPress }) {
   );
 }
 
-function BidCard({ item }) {
+/**
+ * One bid, on a single line — Figma 2:6742. Bidder and tag hug the left, the
+ * amount takes the middle and the time sits right, so a column of them lines
+ * the amounts up against each other.
+ */
+function BidRow({ item }) {
+  const pre = /pre/i.test(item.tag ?? '');
+  return (
+    <View style={styles.bidRow}>
+      <Avatar initials={item.initials} />
+      <Text style={styles.bidName} numberOfLines={1}>
+        {item.name}
+      </Text>
+      <View style={[styles.bidTag, pre && styles.bidTagPre]}>
+        <Text style={[styles.bidTagLabel, pre && styles.bidTagLabelPre]}>{item.tag}</Text>
+      </View>
+      <Text style={styles.bidAmount}>{item.amount}</Text>
+      <Text style={styles.bidTime}>{item.time}</Text>
+    </View>
+  );
+}
+
+/** The rows share one card, divided by hairlines rather than gaps. */
+function BidHistory({ items }) {
   return (
     <View style={styles.bidCard}>
-      <View style={styles.bidTop}>
-        <Avatar initials={item.initials} />
-        <Text style={styles.name} numberOfLines={1}>
-          {item.name}
-        </Text>
-        <Text style={styles.time}>{item.time}</Text>
-      </View>
-      <View style={styles.bidBottom}>
-        <Text style={styles.bidAmount}>{item.amount}</Text>
-        <View style={styles.bidTag}>
-          <Text style={styles.bidTagLabel}>{item.tag}</Text>
+      {items.map((item, i) => (
+        <View key={item.id}>
+          {i > 0 ? <View style={styles.bidDivider} /> : null}
+          <BidRow item={item} />
         </View>
-      </View>
+      ))}
     </View>
   );
 }
@@ -85,6 +103,22 @@ function CommentBlock({ item, nested }) {
       ))}
     </View>
   );
+}
+
+/**
+ * Collapses consecutive same-type entries into groups, so a run of bids can
+ * share a card while comments stay one block each.
+ */
+function groupRuns(items) {
+  return items.reduce((groups, item) => {
+    const last = groups[groups.length - 1];
+    if (item.type === 'bid' && last?.type === 'bid') {
+      last.items.push(item);
+      return groups;
+    }
+    groups.push({ type: item.type, key: item.id, items: [item] });
+    return groups;
+  }, []);
 }
 
 export default function AuctionActivitySheet({ visible, onClose, activity, primaryAction = 'Place a bid', initialTab = 0 }) {
@@ -120,8 +154,19 @@ export default function AuctionActivitySheet({ visible, onClose, activity, prima
         </View>
 
         <ScrollView style={styles.feed} contentContainerStyle={styles.feedContent} showsVerticalScrollIndicator={false}>
-          {items.map((item) =>
-            item.type === 'bid' ? <BidCard key={item.id} item={item} /> : <CommentBlock key={item.id} item={item} />
+          {tab === 'bids' ? (
+            <BidHistory items={items} />
+          ) : (
+            // Recent interleaves both, so runs of bids share one card the way
+            // the Bid history tab does — a card per bid would break the rhythm
+            // and read as four separate events rather than a run of bidding.
+            groupRuns(items).map((group) =>
+              group.type === 'bid' ? (
+                <BidHistory key={group.key} items={group.items} />
+              ) : (
+                <CommentBlock key={group.key} item={group.items[0]} />
+              )
+            )
           )}
         </ScrollView>
 
@@ -163,12 +208,30 @@ const styles = StyleSheet.create({
   tabUnderline: { position: 'absolute', left: 0, right: 0, bottom: -1, height: 2, borderRadius: 2, backgroundColor: color.background.inverseBold },
   feed: { flex: 1 },
   feedContent: { paddingHorizontal: spacing[4], paddingVertical: spacing[3], gap: spacing[4] },
-  bidCard: { backgroundColor: BID_TINT, borderRadius: radius.lg, padding: spacing[3], gap: 6 },
-  bidTop: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  bidBottom: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  bidAmount: { ...font.calloutEmphasized, color: LABEL_PRIMARY },
-  bidTag: { backgroundColor: color.background.brandPrimaryRegular, borderRadius: 4, paddingHorizontal: 4, paddingVertical: 2 },
+  bidCard: {
+    backgroundColor: BID_TINT,
+    borderRadius: radius.xl,
+    paddingHorizontal: spacing[3],
+  },
+  bidRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+    paddingVertical: spacing[3],
+  },
+  // Inset from the card's padding, as the comp draws it.
+  bidDivider: {
+    height: 1,
+    backgroundColor: color.background.neutralMuted,
+  },
+  bidName: { ...font.subheadlineEmphasized, color: LABEL_PRIMARY, flexShrink: 1 },
+  // The amount takes the slack so a column of rows aligns on it.
+  bidAmount: { ...font.calloutEmphasized, color: LABEL_PRIMARY, flex: 1, textAlign: 'right' },
+  bidTime: { ...font.bodyXsRegular, color: color.text.neutralRegular, minWidth: 52, textAlign: 'right' },
+  bidTag: { backgroundColor: color.background.successBold, borderRadius: 4, paddingHorizontal: 4, paddingVertical: 2 },
   bidTagLabel: { ...font.caption2Emphasized, color: color.text.inverseBold },
+  bidTagPre: { backgroundColor: color.background.neutralMuted },
+  bidTagLabelPre: { color: LABEL_PRIMARY },
   comment: { gap: 4 },
   commentNested: { marginLeft: spacing[6], paddingLeft: spacing[3], borderLeftWidth: 1, borderLeftColor: color.border.neutralSubtle },
   commentHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
