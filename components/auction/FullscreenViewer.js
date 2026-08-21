@@ -187,7 +187,9 @@ const styles = StyleSheet.create({
     height: CHIP,
     minWidth: CHIP,
     paddingHorizontal: spacing[1],
-    borderRadius: radius.full,
+    // The hero's 12pt corner, not a pill — the two sets of controls are the
+    // same controls and should not change shape between them.
+    borderRadius: radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.16)',

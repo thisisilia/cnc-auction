@@ -28,6 +28,7 @@ import {
 } from 'react-native';
 import { Icon } from '../Icon';
 import PlayButton from '../PlayButton';
+import { GLASS } from '../../theme/glass';
 import { color, font, layout, radius, spacing } from '../../theme/tokens';
 
 const HERO_HEIGHT = 295;
@@ -47,7 +48,7 @@ function ChromeButton({ glyph, glyphColor, glyphSize = 24, label, count, onPress
         pressed && styles.pressed,
       ]}
     >
-      <Icon name={glyph} size={glyphSize} color={glyphColor ?? color.icon.inverseBold} />
+      <Icon name={glyph} size={glyphSize} color={glyphColor ?? color.icon.neutralBold} />
       {count != null ? <Text style={styles.chromeCount}>{count}</Text> : null}
     </Pressable>
   );
@@ -65,7 +66,7 @@ function CountPill({ glyph, count, label, onPress }) {
       onPress={onPress}
       style={({ pressed }) => [styles.countPill, pressed && styles.pressed]}
     >
-      <Icon name={glyph} size={16} color={color.icon.inverseBold} />
+      <Icon name={glyph} size={16} color={color.icon.neutralBold} />
       <Text style={styles.countText}>{count}</Text>
     </Pressable>
   );
@@ -134,7 +135,7 @@ export default function Hero({
                 onPress={onPlay}
                 style={({ pressed }) => [styles.play, pressed && styles.pressed]}
               >
-                <PlayButton size={64} />
+                <PlayButton size={64} fill="#ffffff" fillOpacity={0.7} glyph={color.icon.neutralBold} />
               </Pressable>
             ) : (
               // The photo itself opens the gallery, not just the badge over it.
@@ -156,7 +157,7 @@ export default function Hero({
           <ChromeButton
             glyph={saved ? 'HeroSaveFilled' : 'HeroSave'}
             glyphSize={16}
-            glyphColor={saved ? color.systemRed : color.icon.inverseBold}
+            glyphColor={saved ? color.systemRed : color.icon.neutralBold}
             label={
               saved
                 ? `Saved, ${auction.saveCount + 1} saves. Tap to unsave`
@@ -233,7 +234,7 @@ const styles = StyleSheet.create({
     width: PILL,
     height: PILL,
     borderRadius: radius.lg,
-    backgroundColor: color.overlay.neutralBold,
+    ...GLASS,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -244,7 +245,7 @@ const styles = StyleSheet.create({
   },
   chromeCount: {
     ...font.subheadlineEmphasized,
-    color: color.text.inverseBold,
+    color: color.text.neutralBold,
   },
   play: {
     width: 64,
@@ -266,11 +267,11 @@ const styles = StyleSheet.create({
     gap: spacing[1],
     paddingHorizontal: spacing[2],
     borderRadius: radius.md,
-    backgroundColor: color.overlay.neutralBold,
+    ...GLASS,
   },
   countText: {
     ...font.caption2Emphasized,
-    color: color.text.inverseBold,
+    color: color.text.neutralBold,
   },
   // Page indicator, centred between the two count pills.
   dots: {

@@ -33,7 +33,7 @@ function HeaderAction({ glyph, glyphColor, label, showLabel, onPress }) {
       onPress={onPress}
       style={({ pressed }) => [styles.headerAction, pressed && styles.pressed]}
     >
-      <Icon name={glyph} size={24} color={glyphColor ?? color.icon.neutralBold} />
+      <Icon name={glyph} size={16} color={glyphColor ?? color.icon.neutralBold} />
       {showLabel ? <Text style={styles.headerActionLabel}>{label}</Text> : null}
     </Pressable>
   );

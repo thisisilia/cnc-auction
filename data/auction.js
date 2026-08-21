@@ -15,7 +15,7 @@ export const auction = {
   reserveStatus: 'Reserve nearly met',
   stats: [
     { icon: 'Gavel', label: '13 Bids' },
-    { icon: 'Comments', label: '6 Comments' },
+    { icon: 'Comment', label: '6 Comments' },
     { icon: 'Eye', label: '320 watching' },
   ],
   latestActivity: {

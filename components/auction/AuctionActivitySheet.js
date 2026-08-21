@@ -4,7 +4,6 @@
  * sticky "Place a bid" action.
  */
 
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,6 +14,9 @@ import { Icon } from '../Icon';
 import { color, font, radius, spacing } from '../../theme/tokens';
 
 const LABEL_PRIMARY = '#333';
+/** One avatar size for every comment, parent or reply, so the column aligns. */
+const AVATAR = 24;
+const VERIFIED = '#34a14f';
 const LABEL_SECONDARY = 'rgba(60,60,67,0.6)';
 // 2:6742 sets the bid card on the neutral subtle fill, not a brand tint — the
 // green belongs to the Bid tag alone.
@@ -87,9 +89,7 @@ function RecentBid({ item }) {
         <Text style={styles.bidName} numberOfLines={1}>
           {item.name}
         </Text>
-        {item.verified ? (
-          <Icon name="CircleCheck" size={18} color={color.background.successBold} />
-        ) : null}
+        {item.verified ? <Icon name="Verified" size={14} color={VERIFIED} /> : null}
         <Text style={styles.bidTime}>{item.time}</Text>
       </View>
       <View style={styles.recentBidBottom}>
@@ -116,27 +116,44 @@ function BidHistory({ items }) {
   );
 }
 
-function CommentBlock({ item, nested }) {
+/**
+ * A comment and its thread. Avatar and content sit side by side so the body and
+ * the Reply link line up under the name rather than under the avatar — the
+ * whole block reads as one column hanging off the name.
+ *
+ * Replies nest inside that column and carry an elbow from the parent's avatar
+ * across to their own, so a thread stays legible without indenting far enough
+ * to squeeze the text.
+ */
+function CommentBlock({ item, nested, onReply }) {
   return (
-    <View style={[styles.comment, nested && styles.commentNested]}>
-      <View style={styles.commentHead}>
-        <Avatar initials={item.initials} size={nested ? 22 : 24} />
-        <Text style={styles.name} numberOfLines={1}>
-          {item.name}
-        </Text>
-        {item.verified ? (
-          <Icon name="CircleCheck" size={18} color={color.background.brandPrimaryRegular} />
-        ) : null}
-        <Text style={styles.time}>{item.time}</Text>
+    <View style={styles.commentRow}>
+      {nested ? <View style={styles.threadElbow} /> : null}
+      <Avatar initials={item.initials} size={AVATAR} />
+      <View style={styles.commentContent}>
+        <View style={styles.commentHead}>
+          <Text style={styles.name} numberOfLines={1}>
+            {item.name}
+          </Text>
+          {item.verified ? <Icon name="Verified" size={14} color={VERIFIED} /> : null}
+          <Text style={styles.time}>{item.time}</Text>
+        </View>
+        <Text style={styles.commentBody}>{item.text}</Text>
+        <Pressable
+          style={styles.reply}
+          accessibilityRole="button"
+          accessibilityLabel={`Reply to ${item.name}`}
+          onPress={() => onReply?.(item)}
+        >
+          <Icon name="Reply" size={18} color={color.text.neutralRegular} />
+          <Text style={styles.replyLabel}>Reply</Text>
+        </Pressable>
+        {item.replies?.map((r) => (
+          <View key={r.id} style={styles.replyBlock}>
+            <CommentBlock item={r} nested onReply={onReply} />
+          </View>
+        ))}
       </View>
-      <Text style={styles.commentBody}>{item.text}</Text>
-      <Pressable style={styles.reply} accessibilityRole="button" accessibilityLabel="Reply">
-        <FontAwesome6 name="reply" size={13} color={color.text.neutralRegular} iconStyle="solid" />
-        <Text style={styles.replyLabel}>Reply</Text>
-      </Pressable>
-      {item.replies?.map((r) => (
-        <CommentBlock key={r.id} item={r} nested />
-      ))}
     </View>
   );
 }
@@ -151,19 +168,22 @@ function CommentComposer({ value, onChange, onSend, autoFocus, onFocus }) {
     <View style={styles.composer}>
       <Avatar initials="IT" size={34} />
       <View style={styles.field}>
-        <TextInput
-          style={styles.input}
-          value={value}
-          onChangeText={onChange}
-          onFocus={onFocus}
-          autoFocus={autoFocus}
-          placeholder="Add a comment"
-          placeholderTextColor={color.text.neutralRegular}
-          accessibilityLabel="Add a comment"
-          returnKeyType="send"
-          onSubmitEditing={onSend}
-          multiline={false}
-        />
+        <View style={styles.fieldText}>
+          {value ? <Text style={styles.fieldLabel}>Add a comment</Text> : null}
+          <TextInput
+            style={styles.input}
+            value={value}
+            onChangeText={onChange}
+            onFocus={onFocus}
+            autoFocus={autoFocus}
+            placeholder="Add a comment"
+            placeholderTextColor={color.text.neutralRegular}
+            accessibilityLabel="Add a comment"
+            returnKeyType="send"
+            onSubmitEditing={onSend}
+            multiline={false}
+          />
+        </View>
         <Pressable accessibilityRole="button" accessibilityLabel="Attach a photo" style={styles.attach}>
           <Icon name="Attach" size={24} color={color.text.labelPrimary} />
         </Pressable>
@@ -199,6 +219,13 @@ export default function AuctionActivitySheet({ visible, onClose, activity, prima
     setDraft('');
     setComposing(false);
   };
+  // Replying opens the composer focused. The name is seeded into the draft so
+  // it is clear which comment is being answered — the thread itself is not
+  // wired yet, so this is the honest half of it rather than a silent no-op.
+  const replyTo = (item) => {
+    setDraft((prev) => (prev ? prev : `@${item.name} `));
+    setComposing(true);
+  };
   useEffect(() => {
     if (!visible) {
       setComposing(false);
@@ -226,7 +253,7 @@ export default function AuctionActivitySheet({ visible, onClose, activity, prima
       : feed;
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} topInset={40} fill>
+    <BottomSheet visible={visible} onClose={onClose} topInset={40} fill bottomInset={0}>
       <View style={styles.sheet}>
         <View style={styles.tabs}>
           {TABS.map((t) => (
@@ -242,7 +269,7 @@ export default function AuctionActivitySheet({ visible, onClose, activity, prima
               item.type === 'bid' ? (
                 <RecentBid key={item.id} item={item} />
               ) : (
-                <CommentBlock key={item.id} item={item} />
+                <CommentBlock key={item.id} item={item} onReply={replyTo} />
               )
             )
           )}
@@ -275,10 +302,10 @@ export default function AuctionActivitySheet({ visible, onClose, activity, prima
                 <Pressable
                   style={styles.commentBtn}
                   accessibilityRole="button"
-                  accessibilityLabel="Add a comment"
+                    accessibilityLabel="Add a comment"
                   onPress={() => setComposing(true)}
                 >
-                  <Icon name="Comments" size={20} color={color.text.labelPrimary} />
+                  <Icon name="Comment" size={32} color={color.text.labelPrimary} />
                 </Pressable>
               ) : null}
             </>
@@ -350,20 +377,44 @@ const styles = StyleSheet.create({
   bidTagLabel: { ...font.caption2Emphasized, color: color.text.inverseBold },
   bidTagPre: { backgroundColor: color.background.gray4 },
   bidTagLabelPre: { color: LABEL_PRIMARY },
-  comment: { gap: 4 },
-  commentNested: { marginLeft: spacing[6], paddingLeft: spacing[3], borderLeftWidth: 1, borderLeftColor: color.border.neutralSubtle },
+  commentRow: { flexDirection: 'row', gap: spacing[2] },
+  commentContent: { flex: 1, gap: spacing[1] },
   commentHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   name: { ...font.footnoteEmphasized, color: LABEL_PRIMARY, flexShrink: 1 },
   time: { ...font.footnoteRegular, color: LABEL_SECONDARY },
-  commentBody: { ...font.subheadlineRegular, color: LABEL_PRIMARY },
+  commentBody: { ...font.footnoteRegular, color: LABEL_PRIMARY },
   reply: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 2 },
-  replyLabel: { ...font.footnoteRegular, color: color.text.neutralRegular },
+  replyLabel: { ...font.footnoteEmphasized, color: color.text.neutralRegular },
+  replyBlock: { marginTop: spacing[3] },
+  // The elbow runs down from the parent's avatar and turns in under the
+  // reply's, which is what makes the nesting readable at this indent.
+  threadElbow: {
+    position: 'absolute',
+    // Sits in the parent avatar's column, dropping from above the reply and
+    // turning in under its avatar.
+    left: -(AVATAR / 2 + spacing[2]),
+    top: -spacing[5],
+    width: AVATAR / 2 + spacing[1],
+    height: spacing[5] + AVATAR / 2,
+    borderLeftWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: color.border.neutralRegular,
+    borderBottomLeftRadius: spacing[3],
+  },
   avatar: { backgroundColor: color.text.brandPrimaryBold, alignItems: 'center', justifyContent: 'center' },
   avatarText: { ...font.caption2Emphasized, color: color.text.inverseBold },
   footer: { flexDirection: 'row', alignItems: 'center', gap: spacing[3], paddingHorizontal: spacing[4], paddingTop: spacing[3] },
   cta: { flex: 1, height: 52, borderRadius: radius.lg, alignItems: 'center', justifyContent: 'center', backgroundColor: color.background.brandPrimaryRegular },
   ctaLabel: { ...font.calloutEmphasized, color: color.text.inverseBold },
-  commentBtn: { width: 52, height: 52, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center', backgroundColor: color.background.neutralSubtle },
+  // Figma 2:7052: a 48 square holding the 32pt icon on an 8pt inset.
+  commentBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: color.background.neutralSubtle,
+  },
   footerComposing: { backgroundColor: color.background.neutralSubtle },
   composer: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
   field: {
@@ -375,9 +426,13 @@ const styles = StyleSheet.create({
     paddingLeft: spacing[4],
     paddingRight: spacing[1.5],
     paddingVertical: spacing[1],
-    borderRadius: radius.full,
+    // 12, not a full pill: the field grows to two lines while typing and a
+    // pill corner reads as a lozenge at that height.
+    borderRadius: radius.lg,
     backgroundColor: color.background.neutralWhite,
   },
+  fieldText: { flex: 1, justifyContent: 'center' },
+  fieldLabel: { ...font.caption1Regular, color: color.text.neutralRegular },
   input: {
     flex: 1,
     ...font.subheadlineRegular,
