@@ -8,8 +8,8 @@
  * the pager rather than riding with it, matching the comp.
  *
  * The indicator shows at most three dots: with a photo per page a full set
- * would be a smear, so it slides a three-dot window along the run and the
- * numeric counter beside it carries the exact position.
+ * would be a smear, so it slides a three-dot window along the run while the
+ * photo badge switches from the total to the position within it.
  *
  * Figma pairs the pill fills with a 50px background blur. React Native has no
  * portable backdrop filter, so `color.overlay.neutralBold` carries a little
@@ -94,6 +94,7 @@ export default function Hero({
   const [page, setPage] = useState(0);
 
   const current = media[page];
+  const onPhoto = current?.type === 'photo';
   const photoCount = media.filter((m) => m.type === 'photo').length;
 
   // A three-dot window that only slides once the run reaches its ends, so the
@@ -166,20 +167,19 @@ export default function Hero({
           onPress={onOpenVideos}
         />
 
-        {/* Both photo-related controls sit together on the right. */}
-        <View style={styles.countsRight}>
-          {current?.type === 'photo' ? (
-            <View style={styles.counter}>
-              <Text style={styles.counterText}>{`${current.index} / ${photoCount}`}</Text>
-            </View>
-          ) : null}
-          <CountPill
-            glyph="HeroImages"
-            count={auction.photoCount}
-            label={`View all ${auction.photoCount} photos`}
-            onPress={onOpenPhotos}
-          />
-        </View>
+        {/* One pill: the photo count until you swipe into the photos, then the
+            position within them. A separate counter alongside it read as two
+            badges saying the same thing. */}
+        <CountPill
+          glyph="HeroImages"
+          count={onPhoto ? `${current.index} / ${photoCount}` : auction.photoCount}
+          label={
+            onPhoto
+              ? `Photo ${current.index} of ${photoCount}. View all photos`
+              : `View all ${auction.photoCount} photos`
+          }
+          onPress={onOpenPhotos}
+        />
       </View>
 
       <View style={styles.dots} pointerEvents="none">
@@ -249,22 +249,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  countsRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[2],
-  },
-  counter: {
-    height: 29,
-    justifyContent: 'center',
-    paddingHorizontal: spacing[2],
-    borderRadius: radius.md,
-    backgroundColor: color.overlay.neutralBold,
-  },
-  counterText: {
-    ...font.caption2Emphasized,
-    color: color.text.inverseBold,
   },
   countPill: {
     height: 29,
