@@ -1,11 +1,13 @@
 /**
- * "Live auction activities" widget — three compact pages (Recent · Bid history
- * · Comments) swiped horizontally, the segmented indicator marking the page.
- * Tapping any page opens the full activity sheet on the matching tab.
+ * "Live auction activities" widget — three states (Recent · Bid history ·
+ * Comments). Swiping left/right swaps only the content (heading + row) with a
+ * quick fade; the segmented indicator stays put and just marks the page. It is a
+ * gesture, not a carousel, so neighbouring pages are never revealed mid-swipe.
+ * Tapping opens the full activity sheet on the matching tab.
  */
 
-import { useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { Animated, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card } from '../ui';
 import { color, font, radius, spacing } from '../../theme/tokens';
 
@@ -45,58 +47,73 @@ function CommentRow({ item }) {
 
 export default function ActivityCard({ activity, onOpen }) {
   const pages = activity.pages;
-  const [width, setWidth] = useState(0);
+  const [index, setIndex] = useState(0);
   const indexRef = useRef(0);
+  indexRef.current = index;
+  const opacity = useRef(new Animated.Value(1)).current;
+  const animating = useRef(false);
+
+  // Swap to the next/previous page (dir = +1 / -1): fade the content out, switch,
+  // fade it back in. The indicator is outside this fade, so it never blinks.
+  const swipe = useCallback(
+    (dir) => {
+      if (animating.current) return;
+      const next = Math.max(0, Math.min(pages.length - 1, indexRef.current + dir));
+      if (next === indexRef.current) return;
+      animating.current = true;
+      Animated.timing(opacity, { toValue: 0, duration: 120, useNativeDriver: true }).start(() => {
+        setIndex(next);
+        Animated.timing(opacity, { toValue: 1, duration: 150, useNativeDriver: true }).start(() => {
+          animating.current = false;
+        });
+      });
+    },
+    [opacity, pages.length]
+  );
+
+  // Keep the latest swipe in a ref so the once-created responder always calls it.
+  const swipeRef = useRef(swipe);
+  swipeRef.current = swipe;
+
+  const pan = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 12 && Math.abs(g.dx) > Math.abs(g.dy),
+      onPanResponderRelease: (_, g) => {
+        if (g.dx <= -40) swipeRef.current(1);
+        else if (g.dx >= 40) swipeRef.current(-1);
+      },
+    })
+  ).current;
+
+  const page = pages[index];
 
   return (
     <Card style={styles.root}>
-      <ScrollTracker
-        onIndex={(i) => (indexRef.current = i)}
-        onWidth={setWidth}
-        width={width}
-      >
-        {pages.map((page, i) => (
-          <Pressable
-            key={page.key}
-            style={[styles.page, width ? { width } : null]}
-            onPress={() => onOpen?.(i)}
-            accessibilityRole="button"
-            accessibilityLabel={`${page.heading}. Open activity`}
-          >
-            <View style={styles.header}>
-              <View style={styles.headingRow}>
-                <Text style={styles.heading}>{page.heading}</Text>
-                {page.subheading ? <Text style={styles.subheading}>{page.subheading}</Text> : null}
-              </View>
-              <View style={styles.dots}>
-                {pages.map((_, j) => (
-                  <View key={j} style={[styles.dot, j === i && styles.dotActive]} />
-                ))}
-              </View>
+      <View style={styles.inner} {...pan.panHandlers}>
+        <Pressable
+          onPress={() => onOpen?.(indexRef.current)}
+          accessibilityRole="button"
+          accessibilityLabel={`${page.heading}. Open activity`}
+        >
+          <View style={styles.header}>
+            <Animated.View style={[styles.headingRow, { opacity }]}>
+              <Text style={styles.heading}>{page.heading}</Text>
+              {page.subheading ? <Text style={styles.subheading}>{page.subheading}</Text> : null}
+            </Animated.View>
+            <View style={styles.dots}>
+              {pages.map((_, i) => (
+                <View key={i} style={[styles.dot, i === index && styles.dotActive]} />
+              ))}
             </View>
-            {page.type === 'bid' ? <BidRow item={page} /> : <CommentRow item={page} />}
-          </Pressable>
-        ))}
-      </ScrollTracker>
-    </Card>
-  );
-}
+          </View>
 
-/** Horizontal pager that reports the settled page index and its measured width. */
-function ScrollTracker({ children, onIndex, onWidth, width }) {
-  return (
-    <Animated.ScrollView
-      horizontal
-      pagingEnabled
-      showsHorizontalScrollIndicator={false}
-      scrollEventThrottle={16}
-      onLayout={(e) => onWidth(e.nativeEvent.layout.width)}
-      onMomentumScrollEnd={(e) => {
-        if (width) onIndex(Math.round(e.nativeEvent.contentOffset.x / width));
-      }}
-    >
-      {children}
-    </Animated.ScrollView>
+          <Animated.View style={[styles.content, { opacity }]}>
+            {page.type === 'bid' ? <BidRow item={page} /> : <CommentRow item={page} />}
+          </Animated.View>
+        </Pressable>
+      </View>
+    </Card>
   );
 }
 
@@ -104,15 +121,21 @@ const styles = StyleSheet.create({
   root: {
     overflow: 'hidden',
   },
-  page: {
+  inner: {
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     gap: spacing[4],
+    // Stop the web build turning a horizontal drag into a text selection, so the
+    // swipe gesture is free to claim it.
+    userSelect: 'none',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  content: {
+    marginTop: spacing[4],
   },
   headingRow: {
     flexDirection: 'row',
