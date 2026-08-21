@@ -101,6 +101,16 @@ export const size = {
  * set. The system font carries the same metrics closely enough at these sizes.
  */
 export const fontFamily = {
+  /**
+   * SF Pro. On iOS "System" *is* SF Pro, and it picks the right optical size
+   * automatically — SF Pro Text below 20pt, SF Pro Display at 20pt and above —
+   * which is why no separate Display face is named here.
+   *
+   * On web this only resolves to SF Pro on Apple hardware, via -apple-system;
+   * a viewer on Windows gets Segoe UI and on Android Roboto. Guaranteeing SF
+   * Pro everywhere means self-hosting the files from developer.apple.com/fonts
+   * and checking the licence for web use — see CHANGELOG / DESIGN_NOTES.
+   */
   display: Platform.select({
     ios: 'System',
     android: 'sans-serif',
@@ -108,24 +118,30 @@ export const fontFamily = {
   }),
 };
 
+/**
+ * Every text style names the family explicitly rather than inheriting whatever
+ * the platform default happens to be, so the intent is visible in code and one
+ * edit re-points the whole page.
+ */
+const family = { fontFamily: fontFamily.display };
+
 export const font = {
-  title2Emphasized: { fontSize: 22, lineHeight: 28, fontWeight: '600' },
-  headlineEmphasized: { fontSize: 18, lineHeight: 24, fontWeight: '600' },
-  bodyRegular: { fontSize: 17, lineHeight: 24, fontWeight: '400', letterSpacing: 0.4 },
-  calloutRegular: { fontSize: 16, lineHeight: 21, fontWeight: '400' },
-  calloutEmphasized: { fontSize: 16, lineHeight: 21, fontWeight: '600' },
-  subheadlineRegular: { fontSize: 15, lineHeight: 20, fontWeight: '400' },
-  subheadlineEmphasized: { fontSize: 15, lineHeight: 20, fontWeight: '600' },
-  footnoteRegular: { fontSize: 13, lineHeight: 18, fontWeight: '400' },
-  footnoteEmphasized: { fontSize: 13, lineHeight: 18, fontWeight: '600' },
-  caption1Regular: { fontSize: 12, lineHeight: 16, fontWeight: '400' },
-  caption1Emphasized: { fontSize: 12, lineHeight: 16, fontWeight: '600' },
-  caption2Emphasized: { fontSize: 11, lineHeight: 13, fontWeight: '600' },
+  title2Emphasized: { fontSize: 22, lineHeight: 28, fontWeight: '600', ...family },
+  headlineEmphasized: { fontSize: 18, lineHeight: 24, fontWeight: '600', ...family },
+  calloutRegular: { fontSize: 16, lineHeight: 21, fontWeight: '400', ...family },
+  calloutEmphasized: { fontSize: 16, lineHeight: 21, fontWeight: '600', ...family },
+  subheadlineRegular: { fontSize: 15, lineHeight: 20, fontWeight: '400', ...family },
+  subheadlineEmphasized: { fontSize: 15, lineHeight: 20, fontWeight: '600', ...family },
+  footnoteRegular: { fontSize: 13, lineHeight: 18, fontWeight: '400', ...family },
+  footnoteEmphasized: { fontSize: 13, lineHeight: 18, fontWeight: '600', ...family },
+  caption1Regular: { fontSize: 12, lineHeight: 16, fontWeight: '400', ...family },
+  caption1Emphasized: { fontSize: 12, lineHeight: 16, fontWeight: '600', ...family },
+  caption2Emphasized: { fontSize: 11, lineHeight: 13, fontWeight: '600', ...family },
   // Body/* ramp — lineHeight is 1.5x in Figma.
-  bodyLgEmphasized: { fontSize: 18, lineHeight: 27, fontWeight: '600' },
-  bodyMdEmphasized: { fontSize: 16, lineHeight: 24, fontWeight: '600' },
-  bodyMdRegular: { fontSize: 16, lineHeight: 24, fontWeight: '400' },
-  bodySmEmphasized: { fontSize: 14, lineHeight: 21, fontWeight: '600' },
-  bodySmRegular: { fontSize: 14, lineHeight: 21, fontWeight: '400' },
-  bodyXsRegular: { fontSize: 12, lineHeight: 18, fontWeight: '400' },
+  bodyLgEmphasized: { fontSize: 18, lineHeight: 27, fontWeight: '600', ...family },
+  bodyMdEmphasized: { fontSize: 16, lineHeight: 24, fontWeight: '600', ...family },
+  bodyMdRegular: { fontSize: 16, lineHeight: 24, fontWeight: '400', ...family },
+  bodySmEmphasized: { fontSize: 14, lineHeight: 21, fontWeight: '600', ...family },
+  bodySmRegular: { fontSize: 14, lineHeight: 21, fontWeight: '400', ...family },
+  bodyXsRegular: { fontSize: 12, lineHeight: 18, fontWeight: '400', ...family },
 };
