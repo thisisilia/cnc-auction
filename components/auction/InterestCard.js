@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing[2],
     paddingHorizontal: spacing[2],
-    borderRadius: radius.full,
+    borderRadius: radius.md,
     backgroundColor: color.background.neutralRegular,
   },
   contactLabel: {
