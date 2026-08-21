@@ -71,7 +71,7 @@ function CommentBlock({ item, nested }) {
           {item.name}
         </Text>
         {item.verified ? (
-          <FontAwesome6 name="circle-check" size={14} color={color.background.brandPrimaryRegular} iconStyle="solid" />
+          <Icon name="CircleCheck" size={18} color={color.background.brandPrimaryRegular} />
         ) : null}
         <Text style={styles.time}>{item.time}</Text>
       </View>

@@ -40,7 +40,7 @@ export default function InterestCard({ interest, onContact, onRequestViewing }) 
           onPress={onContact}
           style={({ pressed }) => [styles.contactButton, pressed && styles.pressed]}
         >
-          <Icon name="WhatsApp" size={15} color={color.icon.neutralBold} />
+          <Icon name="WhatsApp" size={20} color={color.icon.neutralBold} />
           <Text style={styles.contactLabel}>{interest.contactAction}</Text>
         </Pressable>
       </View>
@@ -49,7 +49,7 @@ export default function InterestCard({ interest, onContact, onRequestViewing }) 
         label={interest.viewingAction}
         style={styles.viewingButton}
         onPress={onRequestViewing}
-        icon={<Icon name="Eye" size={18} color={color.icon.labelPrimary} />}
+        icon={<Icon name="EyeLarge" size={20} color={color.icon.labelPrimary} />}
       />
     </Card>
   );

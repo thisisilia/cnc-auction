@@ -19,7 +19,7 @@ export default function BidSummary({ auction }) {
       <View style={styles.stats}>
         {auction.stats.map((stat) => (
           <View key={stat.label} style={styles.stat}>
-            <Icon name={stat.icon} size={13.5} color={color.icon.neutralRegular} />
+            <Icon name={stat.icon} size={18} color={color.icon.neutralRegular} />
             <Text style={styles.statLabel}>{stat.label}</Text>
           </View>
         ))}
