@@ -20,6 +20,8 @@ const VERIFIED = '#34a14f';
 const LABEL_SECONDARY = 'rgba(60,60,67,0.6)';
 // 2:6742 sets the bid card on the neutral subtle fill, not a brand tint — the
 // green belongs to the Bid tag alone.
+// The rail starts just clear of the avatar it hangs from.
+const RAIL_TOP = AVATAR + 2;
 const BID_TINT = color.background.neutralSubtle;
 
 const TABS = [
@@ -130,11 +132,19 @@ function BidHistory({ items }) {
  * to squeeze the text.
  */
 function CommentBlock({ item, nested, onReply }) {
+  // Where the last reply sits inside this comment's column, so the rail can run
+  // from under this avatar down to that reply's avatar and stop there rather
+  // than trailing past the end of the thread.
+  const [lastReplyTop, setLastReplyTop] = useState(null);
+  const replies = item.replies ?? [];
+  const railHeight = lastReplyTop == null ? 0 : lastReplyTop + AVATAR / 2 - RAIL_TOP;
+
   return (
     <View style={styles.commentRow}>
       {nested ? <View style={styles.threadElbow} /> : null}
       <Avatar initials={item.initials} size={AVATAR} />
       <View style={styles.commentContent}>
+        {railHeight > 0 ? <View style={[styles.threadRail, { height: railHeight }]} /> : null}
         <View style={styles.commentHead}>
           <Text style={styles.name} numberOfLines={1}>
             {item.name}
@@ -152,8 +162,16 @@ function CommentBlock({ item, nested, onReply }) {
           <Icon name="Reply" size={18} color={color.text.neutralRegular} />
           <Text style={styles.replyLabel}>Reply</Text>
         </Pressable>
-        {item.replies?.map((r) => (
-          <View key={r.id} style={styles.replyBlock}>
+        {replies.map((r, index) => (
+          <View
+            key={r.id}
+            style={styles.replyBlock}
+            onLayout={
+              index === replies.length - 1
+                ? (e) => setLastReplyTop(e.nativeEvent.layout.y)
+                : undefined
+            }
+          >
             <CommentBlock item={r} nested onReply={onReply} />
           </View>
         ))}
@@ -428,16 +446,25 @@ const styles = StyleSheet.create({
   reply: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 2 },
   replyLabel: { ...font.footnoteEmphasized, color: color.text.neutralRegular },
   replyBlock: { marginTop: spacing[3] },
-  // The elbow runs down from the parent's avatar and turns in under the
-  // reply's, which is what makes the nesting readable at this indent.
+  // The rail drops from just under this comment's avatar, through its name,
+  // body and Reply link, and stops at the last reply's avatar — where that
+  // reply's own elbow turns in. Drawn in the content column but pulled back
+  // into the avatar's centre line, since that is where the thread hangs from.
+  threadRail: {
+    position: 'absolute',
+    left: -(AVATAR / 2 + spacing[2]),
+    top: RAIL_TOP,
+    width: 1,
+    backgroundColor: color.border.neutralRegular,
+  },
+  // The corner the rail turns through to meet the reply's avatar. It shares
+  // the rail's centre line, so the two read as one unbroken stroke.
   threadElbow: {
     position: 'absolute',
-    // Sits in the parent avatar's column, dropping from above the reply and
-    // turning in under its avatar.
     left: -(AVATAR / 2 + spacing[2]),
-    top: -spacing[5],
+    top: -spacing[3],
     width: AVATAR / 2 + spacing[2],
-    height: spacing[5] + AVATAR / 2,
+    height: spacing[3] + AVATAR / 2,
     borderLeftWidth: 1,
     borderBottomWidth: 1,
     borderColor: color.border.neutralRegular,
