@@ -171,6 +171,11 @@ export default function AuctionScreen() {
         barArmed.current = true;
         barAccum.current = 0;
         setBarActive(true);
+      } else if (atBottom) {
+        // At the end of the page the reserved space is only justified while
+        // the bar is filling it — hiding it there is what reads as a gap.
+        barAccum.current = 0;
+        setBarActive(true);
       } else {
         if ((dy > 0 && barAccum.current < 0) || (dy < 0 && barAccum.current > 0)) {
           barAccum.current = 0;
@@ -229,7 +234,11 @@ export default function AuctionScreen() {
       <ScrollView
         ref={scrollRef}
         style={styles.scroll}
-        contentContainerStyle={{ paddingBottom: insets.bottom + barHeight + spacing[8] }}
+        // Reserve exactly the sticky bar plus a little breathing room, so the
+        // FAQ cards clear it without a slab of empty page below them. The bar
+        // already carries the safe-area inset in its own height, so adding
+        // insets.bottom here would count it twice.
+        contentContainerStyle={{ paddingBottom: barHeight + spacing[4] }}
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={16}
         onScroll={onScroll}
