@@ -3,18 +3,23 @@
  *
  * The creative is a single 361x310 export from Figma: its headline is set in
  * a licensed display face and sits on a dotted purple field, neither of which
- * survives being rebuilt in views. The call to action is therefore a
- * transparent hit target laid over the button drawn into the artwork, sized as
- * a fraction of the card so it tracks the image at any width.
+ * survives being rebuilt in views.
+ *
+ * The call to action is a real button laid over the one drawn into that
+ * artwork, sized as a fraction of the card so it tracks the image at any
+ * width. It was a transparent hit target until the label had to change —
+ * baked-in text cannot be re-worded, translated, or scaled with the type
+ * settings. The artwork still carries the old label underneath; the export
+ * wants regenerating without its button when the designer next touches it.
  */
 
-import { Image, Pressable, StyleSheet, View } from 'react-native';
-import { SectionHeading } from '../ui';
+import { Image, StyleSheet, View } from 'react-native';
+import { Button, SectionHeading } from '../ui';
 import { radius, spacing } from '../../theme/tokens';
 
 const CARD_WIDTH = 361;
 const CARD_HEIGHT = 310;
-// Button "Get a quote in minutes" — 329x48 at (16, 246) inside the artwork.
+// The button drawn into the artwork — 329x48 at (16, 246).
 const CTA = {
   left: `${(16 / CARD_WIDTH) * 100}%`,
   top: `${(246 / CARD_HEIGHT) * 100}%`,
@@ -34,12 +39,14 @@ export default function InsuranceAd({ insurance, onGetQuote }) {
           accessibilityIgnoresInvertColors
           accessibilityLabel="Classic car insurance. For car people. By car people. Online specialist insurance, for the cars we love."
         />
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={insurance.ctaLabel}
-          onPress={onGetQuote}
-          style={({ pressed }) => [styles.cta, pressed && styles.pressed]}
-        />
+        <View style={styles.cta}>
+          <Button
+            label={insurance.ctaLabel}
+            variant="primary"
+            style={styles.ctaButton}
+            onPress={onGetQuote}
+          />
+        </View>
       </View>
     </View>
   );
@@ -60,9 +67,11 @@ const styles = StyleSheet.create({
   cta: {
     position: 'absolute',
     ...CTA,
-    borderRadius: radius.full,
   },
-  pressed: {
-    opacity: 0.7,
+  // Fills the box so it covers the drawn button underneath completely.
+  ctaButton: {
+    flex: 1,
+    height: '100%',
+    borderRadius: radius.md,
   },
 });

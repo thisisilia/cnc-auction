@@ -7,6 +7,7 @@
  */
 
 import { Image, StyleSheet, Text, View } from 'react-native';
+import { Icon } from '../Icon';
 import { Button, SectionHeading } from '../ui';
 import { color, font, radius, spacing } from '../../theme/tokens';
 
@@ -58,9 +59,9 @@ export default function Highlights({ highlights, expanded = false, onToggle }) {
 
       <Button
         label={expanded ? highlights.readLess : highlights.readMore}
-        variant="outline"
         style={styles.button}
         onPress={onToggle}
+        icon={<Icon name="Plus" size={20} color={color.icon.labelPrimary} />}
       />
     </View>
   );

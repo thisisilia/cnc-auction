@@ -2,7 +2,6 @@
  * The AA inspection report promo.
  */
 
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { Button, Card } from '../ui';
 import { color, font, size, spacing } from '../../theme/tokens';
@@ -22,16 +21,9 @@ export default function ReportCard({ report, onReadReport }) {
       <Text style={styles.description}>{report.description}</Text>
       <Button
         label={report.action}
+        variant="outline"
         style={styles.button}
         onPress={onReadReport}
-        icon={
-          <FontAwesome6
-            name="file-lines"
-            size={18}
-            color={color.icon.labelPrimary}
-            iconStyle="regular"
-          />
-        }
       />
     </Card>
   );

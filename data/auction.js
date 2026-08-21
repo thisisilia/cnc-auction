@@ -121,7 +121,7 @@ export const auction = {
   insurance: {
     heading: 'We make buying easier',
     // The creative is a fixed 361x310 export; the CTA sits in its lower 48px.
-    ctaLabel: 'Get a quote in minutes',
+    ctaLabel: 'Find out more',
   },
   gallery: {
     heading: 'Gallery',

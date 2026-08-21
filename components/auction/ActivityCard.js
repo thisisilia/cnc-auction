@@ -100,28 +100,42 @@ export default function ActivityCard({ activity, onOpen }) {
     const node = innerRef.current;
     if (!node || !node.addEventListener) return undefined;
     let accum = 0;
+    // One physical gesture must page once. A trackpad flick keeps delivering
+    // wheel events through its momentum — often past a second — so a fixed
+    // cooldown expires mid-gesture and the tail accumulates into a second
+    // page. Instead, once paged, stay closed until the stream actually goes
+    // quiet, which is what marks the end of the gesture.
     let cooling = false;
-    let resetTimer = null;
+    let quietTimer = null;
+    const goQuietAfter = (ms) => {
+      if (quietTimer) clearTimeout(quietTimer);
+      quietTimer = setTimeout(() => {
+        cooling = false;
+        accum = 0;
+      }, ms);
+    };
     const onWheel = (e) => {
       if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // vertical → let the page scroll
       e.preventDefault();
-      if (cooling) return;
+      if (cooling) {
+        // Momentum from the gesture that already paged; keep waiting it out.
+        goQuietAfter(150);
+        return;
+      }
       accum += e.deltaX;
-      if (resetTimer) clearTimeout(resetTimer);
-      resetTimer = setTimeout(() => {
-        accum = 0;
-      }, 180);
+      goQuietAfter(180);
       if (Math.abs(accum) > 30) {
         swipeRef.current(accum > 0 ? 1 : -1);
         accum = 0;
         cooling = true;
-        setTimeout(() => {
-          cooling = false;
-        }, 400);
+        goQuietAfter(150);
       }
     };
     node.addEventListener('wheel', onWheel, { passive: false });
-    return () => node.removeEventListener('wheel', onWheel);
+    return () => {
+      node.removeEventListener('wheel', onWheel);
+      if (quietTimer) clearTimeout(quietTimer);
+    };
   }, []);
 
   const page = pages[index];

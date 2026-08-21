@@ -47,9 +47,9 @@ export default function InterestCard({ interest, onContact, onRequestViewing }) 
 
       <Button
         label={interest.viewingAction}
+        variant="outline"
         style={styles.viewingButton}
         onPress={onRequestViewing}
-        icon={<Icon name="EyeLarge" size={20} color={color.icon.labelPrimary} />}
       />
     </Card>
   );
