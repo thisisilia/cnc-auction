@@ -10,6 +10,7 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet from '../BottomSheet';
 import SendButton from '../SendButton';
+import { countBids, countComments } from './activityCounts';
 import { Icon } from '../Icon';
 import { color, font, radius, spacing } from '../../theme/tokens';
 
@@ -213,8 +214,8 @@ export default function AuctionActivitySheet({ visible, onClose, activity, prima
 
   const counts = {
     recent: feed.length,
-    bids: feed.filter((i) => i.type === 'bid').length,
-    comments: feed.filter((i) => i.type === 'comment').length,
+    bids: countBids(feed),
+    comments: countComments(feed),
   };
 
   const items =
@@ -341,7 +342,7 @@ const styles = StyleSheet.create({
   },
   recentBidTop: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   recentBidBottom: { flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
-  recentBidAmount: { ...font.title2Emphasized, color: LABEL_PRIMARY },
+  recentBidAmount: { ...font.calloutEmphasized, color: LABEL_PRIMARY },
   // The amount takes the slack so a column of rows aligns on it.
   bidAmount: { ...font.calloutEmphasized, color: LABEL_PRIMARY, flex: 1, textAlign: 'right' },
   bidTime: { ...font.bodyXsRegular, color: color.text.neutralRegular, minWidth: 52, textAlign: 'right' },

@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Card } from '../ui';
+import { countBidders, countBids, countComments } from './activityCounts';
 import { USE_NATIVE_DRIVER } from '../../theme/animation';
 import { color, font, radius, spacing } from '../../theme/tokens';
 
@@ -53,12 +54,12 @@ function isPreBid(tag) {
 
 export default function ActivityCard({ activity, onOpen }) {
   const pages = activity.pages;
-  // Derived from the same feed the sheet counts, so the widget cannot claim a
+  // Counted by the same helpers the sheet uses, so the widget cannot claim a
   // different number of bids or comments than the sheet it opens.
   const feed = activity.feed ?? [];
-  const bidCount = feed.filter((i) => i.type === 'bid').length;
-  const commentCount = feed.filter((i) => i.type === 'comment').length;
-  const bidders = new Set(feed.filter((i) => i.type === 'bid').map((i) => i.name)).size;
+  const bidCount = countBids(feed);
+  const commentCount = countComments(feed);
+  const bidders = countBidders(feed);
   const subheadingFor = (key) => {
     if (key === 'bids') {
       return `${bidCount} ${bidCount === 1 ? 'Bid' : 'Bids'} from ${bidders} ${
