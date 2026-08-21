@@ -35,7 +35,7 @@ export const auction = {
     ],
     // Interleaved feed for the sheet's Recent tab; split by type for the others.
     feed: [
-      { id: 'b1', type: 'bid', verified: true, initials: 'RB', name: 'Ricky••••', time: 'Just now', amount: '£40,000', tag: 'Bid' },
+      { id: 'b1', type: 'bid', verified: true, initials: 'RB', name: 'Ricky••••', time: 'Just now', amount: '£35,250', tag: 'Bid' },
       { id: 'c1', type: 'comment', initials: 'BA', name: 'BA_Baracus', time: '2 mins', verified: true, text: "I pity the fool who outbids me. I'm going to buy this sucker, paint it black with a red stripe, then add some guns and maybe a rocket launcher." },
       { id: 'b2', type: 'bid', verified: true, initials: 'TW', name: 'Tom••••', time: '5 mins', amount: '£34,250', tag: 'Bid' },
       { id: 'c2', type: 'comment', initials: 'BA', name: 'BA_Baracus', time: '8 mins', verified: true, text: "Don't you put that evil on me, Ricky Bobby!", replies: [{ id: 'c2r1', initials: 'RB', name: 'RickyBobby', time: '6 mins', verified: true, text: 'Let’s see what you got!' }] },
@@ -101,7 +101,7 @@ export const auction = {
   },
   interest: {
     heading: 'Interest in this vehicle?',
-    description: '350 viewers watching this vehicle.',
+    description: '320 viewers watching this vehicle.',
     location: 'Boroughbridge, United Kingdom',
     specialistInitials: 'IT',
     specialistName: 'Lewis Hamilton',
@@ -138,15 +138,17 @@ export const auction = {
    */
   gallerySheet: {
     heading: 'Gallery',
+    // The categories account for every photo, so they total `photoCount` above
+    // rather than a larger number than the hero badge advertises.
     tabs: [
       { key: 'video', glyph: 'HeroVideos', label: 'Video' },
       { key: 'photos', glyph: 'HeroImages', label: 'Photos' },
     ],
     categories: [
-      { key: 'exterior', label: 'Exterior', count: 14 },
-      { key: 'interior', label: 'Interior', count: 12 },
-      { key: 'engine', label: 'Engine', count: 8 },
-      { key: 'machine', label: 'Machine', count: 8 },
+      { key: 'exterior', label: 'Exterior', count: 12 },
+      { key: 'interior', label: 'Interior', count: 10 },
+      { key: 'engine', label: 'Engine', count: 6 },
+      { key: 'machine', label: 'Machine', count: 6 },
     ],
   },
   buyerGuide: {
